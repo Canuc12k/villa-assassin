@@ -22,7 +22,6 @@
         .action-box { background: #29292e; padding: 15px; border-radius: 8px; font-style: italic; border-left: 5px solid #ff872c; text-align: left; margin-bottom: 20px; }
         .notice { font-size: 12px; color: #7c7c8a; margin-top: 15px; }
         
-        /* Giao diện Bảng điều khiển admin */
         .admin-panel { margin-top: 30px; padding-top: 15px; border-top: 1px dashed #323238; }
         .admin-title { font-size: 13px; color: #7c7c8a; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
         .btn-admin-green { background: #2ed573; color: white; font-size: 14px; padding: 10px; margin-bottom: 8px; }
@@ -45,55 +44,48 @@
     <div id="scr-lobby" class="screen">
         <h2>🏠 PHÒNG CHỜ REAL-TIME</h2>
         <p>Đợi mọi người vào đủ rồi bấm Bắt Đầu nhé.</p>
-        <h4 style="text-align: left; margin-bottom: 5px;">Danh sách người chơi (<span id="player-count">0</span>):</h4>
+        <h4 style="text-align: left; margin-bottom: 5px;">Danh sách (<span id="player-count">0</span>):</h4>
         <ul id="lobby-list"></ul>
         <button class="btn-primary" style="background: #2ed573; margin-top: 15px;" onclick="startGame()">🏁 BẮT ĐẦU TRÒ CHƠI</button>
-        
         <div class="admin-panel">
-            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Nhập lại tên từ đầu)</button>
+            <div class="admin-title">🛠️ ĐIỀU KHIỂN</div>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch (Nhập lại tên)</button>
         </div>
     </div>
 
     <div id="scr-game" class="screen">
         <h2 style="margin-bottom: 5px;">🎯 NHIỆM VỤ CỦA BẠN</h2>
         <p style="color: #7c7c8a; margin-top: 0;">Tuyệt đối bảo mật điện thoại!</p>
-        
         <p>Nạn nhân tiếp theo:</p>
         <div class="target-box" id="target-name">Đang tìm kiếm...</div>
-        
         <p style="text-align: left; margin-bottom: 5px; font-weight: bold;">Cách thức hành động:</p>
         <div class="action-box" id="game-action">Đang tải nhiệm vụ...</div>
-
         <button class="btn-danger" onclick="eliminateMe()">💀 TÔI ĐÃ BỊ HẠ GỤC</button>
-        <p class="notice">Lưu ý: Chỉ bấm nút này khi bạn THỰC SỰ bị sát thủ lừa làm hành động trên ngoài đời.</p>
-
+        <p class="notice">Lưu ý: Chỉ bấm khi bạn THỰC SỰ bị sát thủ lừa.</p>
         <div class="admin-panel">
-            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+            <div class="admin-title">🛠️ ĐIỀU KHIỂN</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới (Giữ người)</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Phòng</button>
         </div>
     </div>
 
     <div id="scr-dead" class="screen">
         <h1 style="color: #7c7c8a;">👻 BẠN ĐÃ HY SINH!</h1>
         <p>Bạn đã bị loại khỏi vòng chiến đấu. Hãy giữ bí mật kẻ đã giết mình...</p>
-        
         <div class="admin-panel" style="margin-top: 40px;">
-            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+            <div class="admin-title">🛠️ ĐIỀU KHIỂN</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Phòng</button>
         </div>
     </div>
 
     <div id="scr-winner" class="screen">
         <h1 style="color: #ffa502;">🏆 CHIẾN THẮNG !!!</h1>
-        <p>Chúc mừng bạn đã tiêu diệt tất cả các mục tiêu và trở thành Sát thủ huyền thoại!</p>
-        
+        <p>Chúc mừng bạn đã tiêu diệt tất cả mục tiêu và trở thành Sát thủ huyền thoại!</p>
         <div class="admin-panel" style="margin-top: 40px;">
-            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+            <div class="admin-title">🛠️ ĐIỀU KHIỂN</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Phòng</button>
         </div>
     </div>
 </div>
@@ -113,8 +105,6 @@
     const db = firebase.database();
 
     let myName = localStorage.getItem('assassin_name') || '';
-    let currentTarget = '';
-    let targetListener = null;
 
     const actionPool = [
         "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
@@ -131,69 +121,36 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // 🚀 HÀM THAM GIA: Sửa lỗi ghi đè danh sách người chơi
-    function joinLobby() {
-        const nameInput = document.getElementById('inp-name').value.trim();
-        if (!nameInput) return alert("Vui lòng nhập tên để mọi người nhận diện!");
-        
-        db.ref('game/state').once('value', (snapshot) => {
-            const state = snapshot.val();
-            if (state === 'playing') {
-                return alert("Trò chơi đã bắt đầu mất rồi bồ ơi! Hãy đợi ván tiếp theo nhé.");
-            }
-            
-            myName = nameInput;
-            localStorage.setItem('assassin_name', myName);
-            
-            // Nếu phòng đang trống hoặc kẹt trạng thái reset, đưa nó về 'lobby' trước
-            if (!state || state === 'reset') {
-                db.ref('game/state').set('lobby');
-            }
-            
-            // Sử dụng set() trực tiếp vào nhánh của user đó, không dùng chung object update cha chống ghi đè chéo
-            db.ref(`game/players/${myName}`).set({
-                status: 'waiting',
-                target: '',
-                action: ''
-            });
-        });
-    }
+    // 🚀 BỘ NÃO TRUNG TÂM: Lắng nghe duy nhất gốc 'game'. Đảm bảo 100% đồng bộ.
+    db.ref('game').on('value', (snapshot) => {
+        const game = snapshot.val() || {};
+        const state = game.state || 'lobby';
+        const players = game.players || {};
 
-    // 🗺️ BỘ ĐIỀU HƯỚNG TOÀN CỤC CHUẨN
-    function checkGameState() {
-        db.ref('game/state').on('value', (snapshot) => {
-            const state = snapshot.val();
-            
-            if (state === 'reset') {
-                localStorage.removeItem('assassin_name');
-                myName = '';
-                showScreen('scr-login');
-            } else if (state === 'playing') {
-                if (myName) {
-                    listenToMyStatus();
-                } else {
-                    showScreen('scr-login');
-                }
-            } else {
-                if (myName) {
-                    showScreen('scr-lobby');
-                    listenToLobby();
-                } else {
-                    showScreen('scr-login');
-                }
-            }
-        });
-    }
+        // 1. Kiểm tra nếu admin bấm nút Xóa sạch phòng
+        if (state === 'reset') {
+            localStorage.removeItem('assassin_name');
+            myName = '';
+            showScreen('scr-login');
+            return;
+        }
 
-    function listenToLobby() {
-        db.ref('game/players').off();
-        db.ref('game/players').on('value', (snapshot) => {
-            const players = snapshot.val() || {};
+        // 2. Nếu người dùng chưa có tên hoặc tên bị bay màu khỏi database
+        if (!myName || !players[myName]) {
+            showScreen('scr-login');
+            return;
+        }
+
+        // --- Bắt đầu vẽ lại giao diện theo dữ liệu phòng ---
+        const myData = players[myName];
+
+        if (state === 'lobby') {
+            // Cập nhật danh sách hiển thị
             const listEl = document.getElementById('lobby-list');
             listEl.innerHTML = '';
             let count = 0;
             for (let p in players) {
-                if(players[p] && (players[p].status === 'waiting' || players[p].status === 'alive')) {
+                if (players[p].status === 'waiting' || players[p].status === 'alive') {
                     let li = document.createElement('li');
                     li.innerText = `• ${p} (Đã sẵn sàng)`;
                     listEl.appendChild(li);
@@ -201,6 +158,63 @@
                 }
             }
             document.getElementById('player-count').innerText = count;
+            showScreen('scr-lobby');
+            
+        } else if (state === 'playing') {
+            if (myData.status === 'dead') {
+                showScreen('scr-dead');
+            } else if (myData.status === 'winner') {
+                showScreen('scr-winner');
+            } else if (myData.status === 'alive') {
+                // Tự động kiểm tra truy vết: Nếu nạn nhân của mình đã chết
+                const currentTarget = myData.target;
+                if (currentTarget && players[currentTarget] && players[currentTarget].status === 'dead') {
+                    const nextTarget = players[currentTarget].target;
+                    // Nếu mục tiêu tiếp theo lại là chính mình -> Thắng
+                    if (nextTarget === myName) {
+                        db.ref(`game/players/${myName}`).update({ status: 'winner' });
+                        return; // Dừng việc vẽ giao diện, chờ database cập nhật vòng lặp sau
+                    } else if (nextTarget && nextTarget !== currentTarget) {
+                        // Chuyển mục tiêu
+                        db.ref(`game/players/${myName}`).update({ target: nextTarget });
+                        return; // Dừng việc vẽ giao diện, chờ database cập nhật vòng lặp sau
+                    }
+                }
+
+                // Cập nhật màn hình Game
+                document.getElementById('game-action').innerText = myData.action || '';
+                document.getElementById('target-name').innerText = currentTarget || '';
+                showScreen('scr-game');
+            }
+        }
+    });
+
+    function joinLobby() {
+        const nameInput = document.getElementById('inp-name').value.trim();
+        if (!nameInput) return alert("Vui lòng nhập tên để mọi người nhận diện!");
+        
+        db.ref('game').once('value', (snapshot) => {
+            const game = snapshot.val() || {};
+            if (game.state === 'playing') {
+                return alert("Trò chơi đã bắt đầu mất rồi bồ ơi! Hãy đợi ván tiếp theo nhé.");
+            }
+
+            // Ghi nhận tên
+            myName = nameInput;
+            localStorage.setItem('assassin_name', myName);
+            
+            // Cập nhật 1 cục duy nhất đẩy lên Firebase (Chống đè dữ liệu, tự động kích hoạt chuyển màn hình)
+            const updates = {};
+            if (!game.state || game.state === 'reset') {
+                updates['game/state'] = 'lobby';
+            }
+            updates[`game/players/${myName}`] = {
+                status: 'waiting',
+                target: '',
+                action: ''
+            };
+            
+            db.ref().update(updates);
         });
     }
 
@@ -215,10 +229,10 @@
     function startGame() {
         db.ref('game/players').once('value', (snapshot) => {
             const playersData = snapshot.val();
-            if (!playersData) return alert("Chưa có ai vào phòng chờ cả bồ ơi!");
+            if (!playersData) return alert("Chưa có ai vào phòng cả!");
             
-            const playerNames = Object.keys(playersData);
-            if (playerNames.length < 3) return alert("Trò chơi cần tối thiểu 3 người để tạo vòng lặp săn lùng!");
+            const playerNames = Object.keys(playersData).filter(p => playersData[p].status === 'waiting' || playersData[p].status === 'alive');
+            if (playerNames.length < 3) return alert("Trò chơi cần tối thiểu 3 người để bắt đầu!");
 
             const shuffled = shuffle([...playerNames]);
             const updates = {};
@@ -235,48 +249,7 @@
                 };
             }
             updates['game/state'] = 'playing';
-            db.ref().update(updates);
-        });
-    }
-
-    function listenToMyStatus() {
-        db.ref(`game/players/${myName}`).off();
-        db.ref(`game/players/${myName}`).on('value', (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-
-            if (data.status === 'dead') {
-                showScreen('scr-dead');
-                if (targetListener) targetListener.off();
-            } else if (data.status === 'winner') {
-                showScreen('scr-winner');
-                if (targetListener) targetListener.off();
-            } else if (data.status === 'alive') {
-                showScreen('scr-game');
-                document.getElementById('game-action').innerText = data.action;
-                if (data.target !== currentTarget) {
-                    watchNewTarget(data.target);
-                }
-            }
-        });
-    }
-
-    function watchNewTarget(targetName) {
-        if (targetListener) targetListener.off();
-        currentTarget = targetName;
-        document.getElementById('target-name').innerText = currentTarget;
-
-        targetListener = db.ref(`game/players/${currentTarget}`);
-        targetListener.on('value', (snapshot) => {
-            const targetData = snapshot.val();
-            if (targetData && targetData.status === 'dead') {
-                const nextTarget = targetData.target;
-                if (nextTarget === myName) {
-                    db.ref(`game/players/${myName}`).update({ status: 'winner' });
-                } else {
-                    db.ref(`game/players/${myName}`).update({ target: nextTarget });
-                }
-            }
+            db.ref().update(updates); // Đẩy lên 1 lượt là màn hình tất cả user tự đổi
         });
     }
 
@@ -287,7 +260,7 @@
     }
 
     function resetKeepPlayers() {
-        if (confirm("Xác nhận đưa tất cả mọi người về phòng chờ để chơi hiệp tiếp theo (Giữ nguyên tên)?")) {
+        if (confirm("Đưa tất cả mọi người về phòng chờ chơi ván mới (Giữ nguyên tên)?")) {
             db.ref('game/players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 const updates = {};
@@ -301,13 +274,11 @@
     }
 
     function resetClearAll() {
-        if (confirm("Hành động này sẽ giải tán phòng và bắt tất cả mọi người nhập lại tên từ đầu. Xác nhận xóa sạch?")) {
-            db.ref('game/players').set(null); // Clear toàn bộ người chơi trước
-            db.ref('game/state').set('reset'); // Set trạng thái reset sau
+        if (confirm("Giải tán phòng và bắt mọi người nhập lại tên từ đầu. Xác nhận?")) {
+            // Đặt game về reset, nó sẽ tự động xóa sạch players theo luồng của não trung tâm
+            db.ref('game').set({ state: 'reset' });
         }
     }
-
-    checkGameState();
 </script>
 </body>
 </html>
