@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sát Thủ Villa 2026 💀</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121214; color: #e1e1e6; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; background: #202024; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid #29292e; }
+        h1 { color: #ff4757; font-size: 28px; margin-top: 0; }
+        h2 { color: #00adb5; }
+        input { width: 100%; padding: 14px; box-sizing: border-box; background: #121214; border: 1px solid #323238; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 15px; text-align: center; }
+        button { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn-primary { background: #00adb5; color: white; }
+        .btn-danger { background: #ff4757; color: white; box-shadow: 0 4px #8b0000; }
+        .btn-danger:active { transform: translateY(4px); box-shadow: none; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        ul { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; background: #121214; border-radius: 8px; padding: 10px; }
+        li { padding: 8px 12px; border-bottom: 1px solid #29292e; color: #a9a9b3; }
+        .target-box { background: #ff4757; color: white; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; margin: 20px 0; letter-spacing: 1px; }
+        .action-box { background: #29292e; padding: 15px; border-radius: 8px; font-style: italic; border-left: 5px solid #ff872c; text-align: left; margin-bottom: 20px; }
+        .notice { font-size: 12px; color: #7c7c8a; margin-top: 15px; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div id="scr-login" class="screen active">
+        <h1>SÁT THỦ ẨN DANH</h1>
+        <p>Trò chơi sinh tồn real-time cho hội bạn Villa</p>
+        <input type="text" id="inp-name" placeholder="Nhập Tên / Biệt Danh của bạn">
+        <button class="btn-primary" onclick="joinLobby()">THAM GIA PHÒNG CHỜ</button>
+    </div>
+
+    <div id="scr-lobby" class="screen">
+        <h2>🏠 PHÒNG CHỜ REAL-TIME</h2>
+        <p>Đợi mọi người vào đủ rồi bấm Bắt Đầu nhé.</p>
+        <h4 style="text-align: left; margin-bottom: 5px;">Danh sách người chơi (<span id="player-count">0</span>):</h4>
+        <ul id="lobby-list"></ul>
+        <button class="btn-primary" style="background: #2ed573;" onclick="startGame()">🏁 BẮT ĐẦU TRÒ CHƠI</button>
+        <button class="btn-danger" style="background: #4b4b54; box-shadow: none;" onclick="resetSystem()">Reset Cả Hệ Thống</button>
+    </div>
+
+    <div id="scr-game" class="screen">
+        <h2 style="margin-bottom: 5px;">🎯 NHIỆM VỤ CỦA BẠN</h2>
+        <p style="color: #7c7c8a; margin-top: 0;">Tuyệt đối bảo mật điện thoại!</p>
+        
+        <p>Nạn nhân tiếp theo:</p>
+        <div class="target-box" id="target-name">Đang tìm kiếm...</div>
+        
+        <p style="text-align: left; margin-bottom: 5px; font-weight: bold;">Cách thức hành động:</p>
+        <div class="action-box" id="game-action">Đang tải nhiệm vụ...</div>
+
+        <button class="btn-danger" onclick="eliminateMe()">💀 TÔI ĐÃ BỊ HẠ GỤC</button>
+        <p class="notice">Lưu ý: Chỉ bấm nút này khi bạn THỰC SỰ bị sát thủ lừa làm hành động trên ngoài đời.</p>
+    </div>
+
+    <div id="scr-dead" class="screen">
+        <h1 style="color: #7c7c8a;">👻 BẠN ĐÃ HY SINH!</h1>
+        <p>Bạn đã bị loại khỏi vòng chiến đấu. Hãy cất điện thoại đi, giữ bí mật kẻ đã giết mình và cùng ngồi "hóng" xem ai sẽ là người sống sót cuối cùng nhé!</p>
+    </div>
+
+    <div id="scr-winner" class="screen">
+        <h1 style="color: #ffa502;">🏆 CHIẾN THẮNG !!!</h1>
+        <p>Chúc mừng bạn đã tiêu diệt tất cả các mục tiêu và trở thành Sát thủ huyền thoại của đêm nay!</p>
+    </div>
+</div>
+
+<script>
+    // =========================================================================
+    // 🛠️ BƯỚC CẦN LÀM: XOÁ ĐOẠN MẪU DƯỚI ĐÂY VÀ DÁN THÔNG TIN FIREBASE CỦA BẠN VÀO
+    // =========================================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBHxM851rftXpe_cG9MRwYsHueqMtvrpBQ",
+        authDomain: "villa-assassin.firebaseapp.com",
+        projectId: "villa-assassin",
+        storageBucket: "villa-assassin.firebasestorage.app",
+        messagingSenderId: "94080018062",
+        appId: "1:94080018062:web:77aa2ced6f5b2e82af0bdf",
+        measurementId: "G-TV6R0BKR29"
+    };
+    // =========================================================================
+
+    // Khởi tạo Firebase kết nối
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let myName = localStorage.getItem('assassin_name') || '';
+    let currentTarget = '';
+    let targetListener = null;
+
+    // Kho "bẫy" hành động ngẫu nhiên (Bạn thích thêm trò gì lầy lội thì cứ viết thêm vào đây nhé)
+    const actionPool = [
+        "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
+        "Khen nạn nhân một câu liên quan đến ngoại hình/trang phục và được họ nói 'Cảm ơn'.",
+        "Rủ nạn nhân chụp chung một tấm ảnh selfie bằng máy điện thoại của bạn thành công.",
+        "Đập tay (High-five) với nạn nhân vì bất kỳ lý do gì.",
+        "Mượn điện thoại của nạn nhân để xem giờ hoặc xem một thứ gì đó thành công.",
+        "Khiến nạn nhân hát hoặc nhẩm theo một câu hát mà bạn vừa chủ động ngân nga.",
+        "Nhờ nạn nhân mở hộ nắp một chai nước hoặc lon nước ngọt."
+    ];
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    if (myName) {
+        checkGameState();
+    }
+
+    function joinLobby() {
+        const nameInput = document.getElementById('inp-name').value.trim();
+        if (!nameInput) return alert("Vui lòng nhập tên để mọi người nhận diện!");
+        myName = nameInput;
+        localStorage.setItem('assassin_name', myName);
+        
+        db.ref(`game/players/${myName}`).set({
+            status: 'waiting',
+            target: '',
+            action: ''
+        }).then(() => {
+            checkGameState();
+        });
+    }
+
+    function checkGameState() {
+        db.ref('game/state').on('value', (snapshot) => {
+            const state = snapshot.val();
+            if (state === 'playing') {
+                listenToMyStatus();
+            } else {
+                showScreen('scr-lobby');
+                listenToLobby();
+            }
+        });
+    }
+
+    function listenToLobby() {
+        db.ref('game/players').on('value', (snapshot) => {
+            const players = snapshot.val() || {};
+            const listEl = document.getElementById('lobby-list');
+            listEl.innerHTML = '';
+            let count = 0;
+            for (let p in players) {
+                let li = document.createElement('li');
+                li.innerText = `• ${p} (Đã sẵn sàng)`;
+                listEl.appendChild(li);
+                count++;
+            }
+            document.getElementById('player-count').innerText = count;
+        });
+    }
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startGame() {
+        db.ref('game/players').once('value', (snapshot) => {
+            const playersData = snapshot.val();
+            if (!playersData) return alert("Chưa có ai vào phòng chờ cả bồ ơi!");
+            
+            const playerNames = Object.keys(playersData);
+            if (playerNames.length < 3) return alert("Trò chơi cần tối thiểu 3 người để tạo vòng lặp săn lùng!");
+
+            // Thuật toán tạo vòng lặp khép kín hoàn hảo: A đuổi B, B đuổi C, C đuổi A
+            const shuffled = shuffle([...playerNames]);
+            const updates = {};
+
+            for (let i = 0; i < shuffled.length; i++) {
+                const currentPlayer = shuffled[i];
+                const targetPlayer = shuffled[(i + 1) % shuffled.length];
+                const randomAction = actionPool[Math.floor(Math.random() * actionPool.length)];
+
+                updates[`game/players/${currentPlayer}`] = {
+                    status: 'alive',
+                    target: targetPlayer,
+                    action: randomAction
+                };
+            }
+            updates['game/state'] = 'playing';
+            
+            db.ref().update(updates);
+        });
+    }
+
+    function listenToMyStatus() {
+        db.ref(`game/players/${myName}`).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+
+            if (data.status === 'dead') {
+                showScreen('scr-dead');
+                if (targetListener) targetListener.off();
+            } else if (data.status === 'winner') {
+                showScreen('scr-winner');
+                if (targetListener) targetListener.off();
+            } else if (data.status === 'alive') {
+                showScreen('scr-game');
+                document.getElementById('game-action').innerText = data.action;
+                
+                if (data.target !== currentTarget) {
+                    watchNewTarget(data.target);
+                }
+            }
+        });
+    }
+
+    function watchNewTarget(targetName) {
+        if (targetListener) targetListener.off();
+        
+        currentTarget = targetName;
+        document.getElementById('target-name').innerText = currentTarget;
+
+        targetListener = db.ref(`game/players/${currentTarget}`);
+        targetListener.on('value', (snapshot) => {
+            const targetData = snapshot.val();
+            if (targetData && targetData.status === 'dead') {
+                const nextTarget = targetData.target;
+                
+                if (nextTarget === myName) {
+                    // Nếu bạn được giao mục tiêu là chính mình -> Bạn đã hạ gục tất cả và thắng cuộc!
+                    db.ref(`game/players/${myName}`).update({ status: 'winner' });
+                } else {
+                    // Thừa kế mục tiêu của người vừa bị hạ gục
+                    db.ref(`game/players/${myName}`).update({ target: nextTarget });
+                }
+            }
+        });
+    }
+
+    function eliminateMe() {
+        if (confirm("Xác nhận bạn đã dính bẫy và chấp nhận hy sinh?")) {
+            db.ref(`game/players/${myName}`).update({ status: 'dead' });
+        }
+    }
+
+    function resetSystem() {
+        if (confirm("Hành động này sẽ xóa sạch dữ liệu phòng chơi để chuẩn bị chơi ván mới từ đầu?")) {
+            localStorage.clear();
+            db.ref('game').remove().then(() => {
+                location.reload();
+            });
+        }
+    }
+</script>
+</body>
+</html>
