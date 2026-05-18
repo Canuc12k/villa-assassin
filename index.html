@@ -131,7 +131,7 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // 🚀 HÀM THAM GIA: Tự động sửa lại trạng thái phòng nếu đang ở trạng thái reset
+    // 🚀 HÀM THAM GIA: Sửa lỗi ghi đè danh sách người chơi
     function joinLobby() {
         const nameInput = document.getElementById('inp-name').value.trim();
         if (!nameInput) return alert("Vui lòng nhập tên để mọi người nhận diện!");
@@ -145,28 +145,26 @@
             myName = nameInput;
             localStorage.setItem('assassin_name', myName);
             
-            const updates = {};
-            // Nếu trạng thái trống hoặc đang kẹt reset, ép nó về 'lobby' ngay
+            // Nếu phòng đang trống hoặc kẹt trạng thái reset, đưa nó về 'lobby' trước
             if (!state || state === 'reset') {
-                updates['game/state'] = 'lobby';
+                db.ref('game/state').set('lobby');
             }
-            updates[`game/players/${myName}`] = {
+            
+            // Sử dụng set() trực tiếp vào nhánh của user đó, không dùng chung object update cha chống ghi đè chéo
+            db.ref(`game/players/${myName}`).set({
                 status: 'waiting',
                 target: '',
                 action: ''
-            };
-            
-            db.ref().update(updates);
+            });
         });
     }
 
-    // 🗺️ BỘ ĐIỀU HƯỚNG TOÀN CỤC CHUẨN: Ngăn chặn lỗi kẹt màn hình giữa các trình duyệt khác nhau
+    // 🗺️ BỘ ĐIỀU HƯỚNG TOÀN CỤC CHUẨN
     function checkGameState() {
         db.ref('game/state').on('value', (snapshot) => {
             const state = snapshot.val();
             
             if (state === 'reset') {
-                // Nếu dính lệnh reset từ Admin: Xóa bộ nhớ thiết bị hiện tại và đẩy ra Login
                 localStorage.removeItem('assassin_name');
                 myName = '';
                 showScreen('scr-login');
@@ -177,7 +175,6 @@
                     showScreen('scr-login');
                 }
             } else {
-                // Trạng thái 'lobby' hoặc trống
                 if (myName) {
                     showScreen('scr-lobby');
                     listenToLobby();
@@ -289,7 +286,6 @@
         }
     }
 
-    // 🔄 NÚT XANH: Chơi ván mới giữ nguyên người
     function resetKeepPlayers() {
         if (confirm("Xác nhận đưa tất cả mọi người về phòng chờ để chơi hiệp tiếp theo (Giữ nguyên tên)?")) {
             db.ref('game/players').once('value', (snapshot) => {
@@ -304,17 +300,13 @@
         }
     }
 
-    // 🗑️ NÚT ĐỎ: Giải tán toàn bộ phòng, làm sạch database
     function resetClearAll() {
         if (confirm("Hành động này sẽ giải tán phòng và bắt tất cả mọi người nhập lại tên từ đầu. Xác nhận xóa sạch?")) {
-            const updates = {};
-            updates['game/state'] = 'reset';
-            updates['game/players'] = null; // Xoá sạch toàn bộ danh sách người chơi trên Firebase
-            db.ref().update(updates);
+            db.ref('game/players').set(null); // Clear toàn bộ người chơi trước
+            db.ref('game/state').set('reset'); // Set trạng thái reset sau
         }
     }
 
-    // KHỞI CHẠY HỆ THỐNG
     checkGameState();
 </script>
 </body>
