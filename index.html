@@ -99,7 +99,6 @@
 </div>
 
 <script>
-    // Config Firebase giữ nguyên theo thông tin tài khoản của bạn
     const firebaseConfig = {
         apiKey: "AIzaSyBHxM851rftXpe_cG9MRwYsHueqMtvrpBQ",
         authDomain: "villa-assassin.firebaseapp.com",
@@ -110,7 +109,6 @@
         measurementId: "G-TV6R0BKR29"
     };
 
-    // Khởi tạo Firebase kết nối
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -118,7 +116,6 @@
     let currentTarget = '';
     let targetListener = null;
 
-    // Kho bẫy hành động ngẫu nhiên
     const actionPool = [
         "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
         "Khen nạn nhân một câu liên quan đến ngoại hình/trang phục và được họ nói 'Cảm ơn'.",
@@ -134,44 +131,63 @@
         document.getElementById(id).classList.add('active');
     }
 
-    if (myName) {
-        checkGameState();
-    }
-
+    // 🚀 HÀM THAM GIA PHÒNG: Tự động sửa lỗi kẹt nút bấm
     function joinLobby() {
         const nameInput = document.getElementById('inp-name').value.trim();
         if (!nameInput) return alert("Vui lòng nhập tên để mọi người nhận diện!");
-        myName = nameInput;
-        localStorage.setItem('assassin_name', myName);
         
-        db.ref(`game/players/${myName}`).set({
-            status: 'waiting',
-            target: '',
-            action: ''
-        }).then(() => {
-            checkGameState();
+        // Kiểm tra xem phòng có đang chơi giữa chừng không
+        db.ref('game/state').once('value', (snapshot) => {
+            const state = snapshot.val();
+            if (state === 'playing') {
+                return alert("Trò chơi đã bắt đầu mất rồi bồ ơi! Hãy đợi ván tiếp theo nhé.");
+            }
+            
+            // Cập nhật thông tin cục bộ
+            myName = nameInput;
+            localStorage.setItem('assassin_name', myName);
+            
+            const updates = {};
+            updates['game/state'] = 'lobby'; // Mở lại cửa phòng chờ ngay lập tức
+            updates[`game/players/${myName}`] = {
+                status: 'waiting',
+                target: '',
+                action: ''
+            };
+            
+            db.ref().update(updates);
         });
     }
 
-    // Bộ điều hướng thông minh nhận diện trạng thái 'reset' để giải tán phòng
+    // 🗺️ BỘ ĐIỀU HƯỚNG TOÀN CỤC CHUẨN: Quản lý màn hình theo thời gian thực chống lỗi
     function checkGameState() {
         db.ref('game/state').on('value', (snapshot) => {
             const state = snapshot.val();
+            
             if (state === 'playing') {
-                listenToMyStatus();
+                if (myName) {
+                    listenToMyStatus();
+                } else {
+                    showScreen('scr-login');
+                }
             } else if (state === 'lobby') {
-                showScreen('scr-lobby');
-                listenToLobby();
+                if (myName) {
+                    showScreen('scr-lobby');
+                    listenToLobby();
+                } else {
+                    showScreen('scr-login');
+                }
             } else {
-                // Nếu state trống hoặc là 'reset' -> Trục xuất về màn đăng nhập nhập tên từ đầu
-                showScreen('scr-login');
+                // Khi admin bấm Xóa Sạch (Trạng thái 'reset' hoặc rỗng) -> Ép tất cả về màn Login
                 localStorage.removeItem('assassin_name');
                 myName = '';
+                showScreen('scr-login');
             }
         });
     }
 
     function listenToLobby() {
+        db.ref('game/players').off(); // Dọn dẹp listener cũ chống lag
         db.ref('game/players').on('value', (snapshot) => {
             const players = snapshot.val() || {};
             const listEl = document.getElementById('lobby-list');
@@ -225,6 +241,7 @@
     }
 
     function listenToMyStatus() {
+        db.ref(`game/players/${myName}`).off(); // Dọn dẹp listener cũ chống lag
         db.ref(`game/players/${myName}`).on('value', (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -270,18 +287,14 @@
         }
     }
 
-    // 🔄 NÚT XANH: Giữ nguyên danh sách người chơi, đưa tất cả về phòng chờ chơi hiệp 2
+    // 🔄 NÚT XANH: Chơi hiệp 2 (Giữ nguyên người)
     function resetKeepPlayers() {
         if (confirm("Xác nhận đưa tất cả mọi người về phòng chờ để chơi hiệp tiếp theo (Giữ nguyên tên)?")) {
             db.ref('game/players').once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 const updates = {};
                 for (let p in players) {
-                    updates[`game/players/${p}`] = {
-                        status: 'waiting',
-                        target: '',
-                        action: ''
-                    };
+                    updates[`game/players/${p}`] = { status: 'waiting', target: '', action: '' };
                 }
                 updates['game/state'] = 'lobby';
                 db.ref().update(updates);
@@ -289,13 +302,15 @@
         }
     }
 
-    // 🗑️ NÚT ĐỎ: Giải tán phòng, xóa sạch dữ liệu, đuổi tất cả các máy về màn nhập tên ban đầu
+    // 🗑️ NÚT ĐỎ: Giải tán phòng hoàn toàn
     function resetClearAll() {
         if (confirm("Hành động này sẽ giải tán phòng và bắt tất cả mọi người nhập lại tên từ đầu. Xác nhận xóa sạch?")) {
-            localStorage.clear();
             db.ref('game').set({ state: 'reset' });
         }
     }
+
+    // KÍCH HOẠT HỆ THỐNG ĐỊNH TUYẾN KHI CHẠY TRANG WEB
+    checkGameState();
 </script>
 </body>
 </html>
