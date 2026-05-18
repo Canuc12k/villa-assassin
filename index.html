@@ -21,6 +21,12 @@
         .target-box { background: #ff4757; color: white; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; margin: 20px 0; letter-spacing: 1px; }
         .action-box { background: #29292e; padding: 15px; border-radius: 8px; font-style: italic; border-left: 5px solid #ff872c; text-align: left; margin-bottom: 20px; }
         .notice { font-size: 12px; color: #7c7c8a; margin-top: 15px; }
+        
+        /* Giao diện Bảng điều khiển admin */
+        .admin-panel { margin-top: 30px; padding-top: 15px; border-top: 1px dashed #323238; }
+        .admin-title { font-size: 13px; color: #7c7c8a; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
+        .btn-admin-green { background: #2ed573; color: white; font-size: 14px; padding: 10px; margin-bottom: 8px; }
+        .btn-admin-red { background: #ff4757; color: white; font-size: 14px; padding: 10px; box-shadow: none; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -41,8 +47,12 @@
         <p>Đợi mọi người vào đủ rồi bấm Bắt Đầu nhé.</p>
         <h4 style="text-align: left; margin-bottom: 5px;">Danh sách người chơi (<span id="player-count">0</span>):</h4>
         <ul id="lobby-list"></ul>
-        <button class="btn-primary" style="background: #2ed573;" onclick="startGame()">🏁 BẮT ĐẦU TRÒ CHƠI</button>
-        <button class="btn-danger" style="background: #4b4b54; box-shadow: none;" onclick="resetSystem()">Reset Cả Hệ Thống</button>
+        <button class="btn-primary" style="background: #2ed573; margin-top: 15px;" onclick="startGame()">🏁 BẮT ĐẦU TRÒ CHƠI</button>
+        
+        <div class="admin-panel">
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Nhập lại tên từ đầu)</button>
+        </div>
     </div>
 
     <div id="scr-game" class="screen">
@@ -57,25 +67,39 @@
 
         <button class="btn-danger" onclick="eliminateMe()">💀 TÔI ĐÃ BỊ HẠ GỤC</button>
         <p class="notice">Lưu ý: Chỉ bấm nút này khi bạn THỰC SỰ bị sát thủ lừa làm hành động trên ngoài đời.</p>
+
+        <div class="admin-panel">
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+        </div>
     </div>
 
     <div id="scr-dead" class="screen">
         <h1 style="color: #7c7c8a;">👻 BẠN ĐÃ HY SINH!</h1>
         <p>Bạn đã bị loại khỏi vòng chiến đấu. Hãy giữ bí mật kẻ đã giết mình...</p>
-        <button class="btn-danger" style="background: #4b4b54; box-shadow: none; margin-top: 30px;" onclick="resetSystem()">Reset Cả Hệ Thống</button>
+        
+        <div class="admin-panel" style="margin-top: 40px;">
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+        </div>
     </div>
 
     <div id="scr-winner" class="screen">
         <h1 style="color: #ffa502;">🏆 CHIẾN THẮNG !!!</h1>
         <p>Chúc mừng bạn đã tiêu diệt tất cả các mục tiêu và trở thành Sát thủ huyền thoại!</p>
-        <button class="btn-primary" style="background: #2ed573; margin-top: 30px;" onclick="resetSystem()">Chơi Ván Mới (Reset)</button>
+        
+        <div class="admin-panel" style="margin-top: 40px;">
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN HỆ THỐNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Tiếp Theo (Giữ người)</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Đăng ký lại)</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // =========================================================================
-    // 🛠️ BƯỚC CẦN LÀM: XOÁ ĐOẠN MẪU DƯỚI ĐÂY VÀ DÁN THÔNG TIN FIREBASE CỦA BẠN VÀO
-    // =========================================================================
+    // Config Firebase giữ nguyên theo thông tin tài khoản của bạn
     const firebaseConfig = {
         apiKey: "AIzaSyBHxM851rftXpe_cG9MRwYsHueqMtvrpBQ",
         authDomain: "villa-assassin.firebaseapp.com",
@@ -85,7 +109,6 @@
         appId: "1:94080018062:web:77aa2ced6f5b2e82af0bdf",
         measurementId: "G-TV6R0BKR29"
     };
-    // =========================================================================
 
     // Khởi tạo Firebase kết nối
     firebase.initializeApp(firebaseConfig);
@@ -95,7 +118,7 @@
     let currentTarget = '';
     let targetListener = null;
 
-    // Kho "bẫy" hành động ngẫu nhiên (Bạn thích thêm trò gì lầy lội thì cứ viết thêm vào đây nhé)
+    // Kho bẫy hành động ngẫu nhiên
     const actionPool = [
         "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
         "Khen nạn nhân một câu liên quan đến ngoại hình/trang phục và được họ nói 'Cảm ơn'.",
@@ -130,14 +153,20 @@
         });
     }
 
+    // Bộ điều hướng thông minh nhận diện trạng thái 'reset' để giải tán phòng
     function checkGameState() {
         db.ref('game/state').on('value', (snapshot) => {
             const state = snapshot.val();
             if (state === 'playing') {
                 listenToMyStatus();
-            } else {
+            } else if (state === 'lobby') {
                 showScreen('scr-lobby');
                 listenToLobby();
+            } else {
+                // Nếu state trống hoặc là 'reset' -> Trục xuất về màn đăng nhập nhập tên từ đầu
+                showScreen('scr-login');
+                localStorage.removeItem('assassin_name');
+                myName = '';
             }
         });
     }
@@ -149,10 +178,12 @@
             listEl.innerHTML = '';
             let count = 0;
             for (let p in players) {
-                let li = document.createElement('li');
-                li.innerText = `• ${p} (Đã sẵn sàng)`;
-                listEl.appendChild(li);
-                count++;
+                if(players[p].status === 'waiting' || players[p].status === 'alive' || players[p].status === 'dead' || players[p].status === 'winner') {
+                    let li = document.createElement('li');
+                    li.innerText = `• ${p} (Đã sẵn sàng)`;
+                    listEl.appendChild(li);
+                    count++;
+                }
             }
             document.getElementById('player-count').innerText = count;
         });
@@ -174,7 +205,6 @@
             const playerNames = Object.keys(playersData);
             if (playerNames.length < 3) return alert("Trò chơi cần tối thiểu 3 người để tạo vòng lặp săn lùng!");
 
-            // Thuật toán tạo vòng lặp khép kín hoàn hảo: A đuổi B, B đuổi C, C đuổi A
             const shuffled = shuffle([...playerNames]);
             const updates = {};
 
@@ -190,7 +220,6 @@
                 };
             }
             updates['game/state'] = 'playing';
-            
             db.ref().update(updates);
         });
     }
@@ -209,7 +238,6 @@
             } else if (data.status === 'alive') {
                 showScreen('scr-game');
                 document.getElementById('game-action').innerText = data.action;
-                
                 if (data.target !== currentTarget) {
                     watchNewTarget(data.target);
                 }
@@ -219,7 +247,6 @@
 
     function watchNewTarget(targetName) {
         if (targetListener) targetListener.off();
-        
         currentTarget = targetName;
         document.getElementById('target-name').innerText = currentTarget;
 
@@ -228,12 +255,9 @@
             const targetData = snapshot.val();
             if (targetData && targetData.status === 'dead') {
                 const nextTarget = targetData.target;
-                
                 if (nextTarget === myName) {
-                    // Nếu bạn được giao mục tiêu là chính mình -> Bạn đã hạ gục tất cả và thắng cuộc!
                     db.ref(`game/players/${myName}`).update({ status: 'winner' });
                 } else {
-                    // Thừa kế mục tiêu của người vừa bị hạ gục
                     db.ref(`game/players/${myName}`).update({ target: nextTarget });
                 }
             }
@@ -246,12 +270,30 @@
         }
     }
 
-    function resetSystem() {
-        if (confirm("Hành động này sẽ xóa sạch dữ liệu phòng chơi để chuẩn bị chơi ván mới từ đầu?")) {
-            localStorage.clear();
-            db.ref('game').remove().then(() => {
-                location.reload();
+    // 🔄 NÚT XANH: Giữ nguyên danh sách người chơi, đưa tất cả về phòng chờ chơi hiệp 2
+    function resetKeepPlayers() {
+        if (confirm("Xác nhận đưa tất cả mọi người về phòng chờ để chơi hiệp tiếp theo (Giữ nguyên tên)?")) {
+            db.ref('game/players').once('value', (snapshot) => {
+                const players = snapshot.val() || {};
+                const updates = {};
+                for (let p in players) {
+                    updates[`game/players/${p}`] = {
+                        status: 'waiting',
+                        target: '',
+                        action: ''
+                    };
+                }
+                updates['game/state'] = 'lobby';
+                db.ref().update(updates);
             });
+        }
+    }
+
+    // 🗑️ NÚT ĐỎ: Giải tán phòng, xóa sạch dữ liệu, đuổi tất cả các máy về màn nhập tên ban đầu
+    function resetClearAll() {
+        if (confirm("Hành động này sẽ giải tán phòng và bắt tất cả mọi người nhập lại tên từ đầu. Xác nhận xóa sạch?")) {
+            localStorage.clear();
+            db.ref('game').set({ state: 'reset' });
         }
     }
 </script>
