@@ -116,7 +116,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Các biến cục bộ của người chơi
     let myName = localStorage.getItem('assassin_name') || '';
     let roomId = localStorage.getItem('assassin_room') || '';
     let roomRef = null;
@@ -136,13 +135,12 @@
         document.getElementById(id).classList.add('active');
     }
 
-    // 🚀 BỘ NÃO TRUNG TÂM PHÒNG CHƠI: Theo dõi duy nhất nhánh rooms/roomId
+    // 🚀 BỘ NÃO TRUNG TÂM PHÒNG CHƠI
     function listenToRoom(id) {
         roomId = id.toUpperCase();
         localStorage.setItem('assassin_room', roomId);
         localStorage.setItem('assassin_name', myName);
 
-        // Hiển thị mã phòng lên toàn bộ các tag giao diện
         document.querySelectorAll('.txt-room-id').forEach(el => el.innerText = roomId);
 
         if (roomRef) roomRef.off();
@@ -151,7 +149,7 @@
         roomRef.on('value', (snapshot) => {
             const roomData = snapshot.val();
 
-            // Nếu phòng bị xóa hoặc bị reset từ phía admin chủ phòng
+            // Nếu phòng bị xóa hoặc bị chủ phòng giải tán
             if (!roomData || roomData.state === 'reset') {
                 localStorage.removeItem('assassin_room');
                 roomId = '';
@@ -162,9 +160,20 @@
 
             const state = roomData.state || 'lobby';
             const players = roomData.players || {};
-            const host = roomData.host || '';
+            let host = roomData.host || '';
 
-            // Phân quyền hiển thị Bảng điều khiển admin cho Host
+            // ⭐ TÍNH NĂNG NÂNG CẤP: CHUYỂN GIAO QUYỀN LỰC (HOST MIGRATION)
+            // Nếu Chủ phòng cũ bị rớt mạng hoặc rời đi (không nằm trong danh sách players nữa)
+            if (host && !players[host]) {
+                const remainingPlayers = Object.keys(players);
+                if (remainingPlayers.length > 0) {
+                    const newHost = remainingPlayers[0];
+                    db.ref(`rooms/${roomId}/host`).set(newHost);
+                    return; // Ngắt để đợi chu kỳ render tiếp theo từ Firebase gán lại quyền
+                }
+            }
+
+            // Phân quyền hiển thị Bảng điều khiển admin cho Host hiện tại
             const isAdmin = (myName && myName === host);
             document.querySelectorAll('.admin-panel').forEach(panel => {
                 panel.style.display = isAdmin ? 'block' : 'none';
@@ -177,7 +186,7 @@
                 waitMsg.style.display = isAdmin ? 'none' : 'block';
             }
 
-            // Nếu tên của mình đột ngột không nằm trong danh sách phòng
+            // Nếu vì lý do nào đó tên của mình biến mất khỏi danh sách phòng
             if (!players[myName]) {
                 showScreen('scr-login');
                 return;
@@ -206,7 +215,7 @@
                 } else if (myData.status === 'alive') {
                     const currentTarget = myData.target;
                     
-                    // Cơ chế truy vết vòng lặp mục tiêu khi có người chết
+                    // Cơ chế bắc cầu mục tiêu real-time khi nạn nhân bị hạ gục
                     if (currentTarget && players[currentTarget] && players[currentTarget].status === 'dead') {
                         const nextTarget = players[currentTarget].target;
                         if (nextTarget === myName) {
@@ -231,11 +240,9 @@
         const nameInput = document.getElementById('inp-name').value.trim();
         if (!nameInput) return alert("Vui lòng nhập tên của bạn trước khi tạo phòng!");
 
-        // Sinh mã ngẫu nhiên 4 ký tự (Ví dụ: A8FD)
         const generatedRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
         myName = nameInput;
 
-        // Khởi tạo cấu trúc phòng mới tinh lên Firebase
         db.ref(`rooms/${generatedRoomId}`).set({
             state: 'lobby',
             host: myName,
@@ -243,6 +250,8 @@
                 [myName]: { status: 'waiting', target: '', action: '' }
             }
         }).then(() => {
+            // ⭐ TÍNH NĂNG NÂNG CẤP: Tự xóa khi ngắt kết nối (onDisconnect)
+            db.ref(`rooms/${generatedRoomId}/players/${myName}`).onDisconnect().remove();
             listenToRoom(generatedRoomId);
         });
     }
@@ -257,25 +266,45 @@
 
         db.ref(`rooms/${roomInput}`).once('value', (snapshot) => {
             if (!snapshot.exists()) {
-                return alert("Mã phòng này không tồn tại bồ ơi! Kiểm tra lại xem gõ đúng chưa.");
+                return alert("Mã phòng này không tồn tại bồ ơi!");
             }
 
             const roomData = snapshot.val();
-            if (roomData.state === 'playing') {
-                return alert("Phòng này game đang chạy mất rồi bồ ơi, đợi ván tiếp theo nhé.");
+            const players = roomData.players || {};
+
+            // ⭐ TÍNH NĂNG NÂNG CẤP: DỌN DẸP PHÒNG MA (GHOST ROOM CLEAN)
+            // Nếu phòng tồn tại trên hệ thống nhưng không có bất kỳ ai ở trong -> Biến nó thành phòng mới do người này làm host
+            if (Object.keys(players).length === 0) {
+                db.ref(`rooms/${roomInput}`).set({
+                    state: 'lobby',
+                    host: nameInput,
+                    players: {
+                        [nameInput]: { status: 'waiting', target: '', action: '' }
+                    }
+                }).then(() => {
+                    db.ref(`rooms/${roomInput}/players/${nameInput}`).onDisconnect().remove();
+                    myName = nameInput;
+                    listenToRoom(roomInput);
+                });
+                return;
             }
-            if (roomData.players && roomData.players[nameInput]) {
-                return alert("Tên này đã có người trong phòng lấy mất rồi bồ!");
+
+            if (roomData.state === 'playing') {
+                return alert("Phòng này game đang chạy mất rồi bồ ơi!");
+            }
+            if (players[nameInput]) {
+                return alert("Tên này đã có người lấy mất rồi!");
             }
 
             myName = nameInput;
             
-            // Thêm bản thân vào nhánh players của phòng đó
             db.ref(`rooms/${roomInput}/players/${myName}`).set({
                 status: 'waiting',
                 target: '',
                 action: ''
             }).then(() => {
+                // ⭐ TÍNH NĂNG NÂNG CẤP: Tự xóa khi ngắt kết nối (onDisconnect)
+                db.ref(`rooms/${roomInput}/players/${myName}`).onDisconnect().remove();
                 listenToRoom(roomInput);
             });
         });
@@ -295,7 +324,7 @@
             if (!playersData) return alert("Chưa có thần dân nào vào phòng!");
             
             const playerNames = Object.keys(playersData);
-            if (playerNames.length < 3) return alert("Cần tối thiểu 3 người để kích hoạt vòng tròn Sát Thủ!");
+            if (playerNames.length < 3) return alert("Cần tối thiểu 3 người để kích hoạt trò chơi!");
 
             const shuffled = shuffle([...playerNames]);
             const updates = {};
@@ -342,7 +371,7 @@
         }
     }
 
-    // Khởi động: Kiểm tra nếu có bộ nhớ đệm phòng cũ thì tự động kết nối lại luôn
+    // Tự động kết nối lại nếu bộ nhớ trình duyệt có sẵn thông tin phòng cũ
     if (myName && roomId) {
         listenToRoom(roomId);
     } else {
