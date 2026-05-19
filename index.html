@@ -4,29 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sát Thủ Villa 2026 💀</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #121214; color: #e1e1e6; text-align: center; margin: 0; padding: 20px; }
-        .container { max-width: 450px; margin: 0 auto; background: #202024; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border: 1px solid #29292e; }
-        h1 { color: #ff4757; font-size: 28px; margin-top: 0; }
-        h2 { color: #00adb5; }
-        .room-tag { background: #ff872c; color: #121214; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block; margin-bottom: 15px; }
-        input { width: 100%; padding: 14px; box-sizing: border-box; background: #121214; border: 1px solid #323238; border-radius: 8px; color: #fff; font-size: 16px; margin-bottom: 15px; text-align: center; }
-        button { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        .btn-primary { background: #00adb5; color: white; }
-        .btn-danger { background: #ff4757; color: white; box-shadow: 0 4px #8b0000; }
+        :root {
+            --primary: #00adb5;
+            --danger: #ff4757;
+            --dark-bg: #121214;
+            --card-bg: #1c1c1f;
+            --text-glow: 0 0 12px rgba(255, 71, 87, 0.6);
+        }
+
+        body { 
+            font-family: 'Be Vietnam Pro', Arial, sans-serif; 
+            background: radial-gradient(circle, #1a1a1f 0%, #0d0d0f 100%); 
+            color: #e1e1e6; 
+            text-align: center; 
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 420px; 
+            background: var(--card-bg); 
+            padding: 35px 25px; 
+            border-radius: 20px; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6); 
+            border: 1px solid #2a2a30; 
+        }
+
+        /* 👑 PHÔNG CHỮ PVP CHO TÊN GAME */
+        h1.game-title { 
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: var(--danger); 
+            font-size: 32px; 
+            margin-top: 0; 
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-shadow: var(--text-glow);
+            text-transform: uppercase;
+        }
+
+        .game-subtitle {
+            font-size: 13px;
+            color: #7c7c8a;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 35px;
+            font-weight: 500;
+        }
+
+        h2 { font-family: 'Orbitron', sans-serif; color: var(--primary); letter-spacing: 1px; }
+        
+        .room-tag { 
+            font-family: 'Orbitron', sans-serif;
+            background: #ff872c; 
+            color: #121214; 
+            padding: 5px 12px; 
+            border-radius: 6px; 
+            font-weight: 900; 
+            font-size: 15px; 
+            display: inline-block; 
+            margin-bottom: 15px; 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 15px; 
+            box-sizing: border-box; 
+            background: var(--dark-bg); 
+            border: 2px solid #2d2d35; 
+            border-radius: 10px; 
+            color: #fff; 
+            font-size: 16px; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            transition: 0.3s;
+            font-weight: 500;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 173, 181, 0.2);
+        }
+
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 15px; 
+            font-weight: 700; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            margin-top: 8px; 
+            transition: 0.2s; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px rgba(0, 136, 143, 1); }
+        .btn-primary:active { transform: translateY(3px); box-shadow: none; }
+        
+        .btn-action { background: #2ed573; color: white; box-shadow: 0 4px #21a455; }
+        .btn-action:active { transform: translateY(3px); box-shadow: none; }
+
+        .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px #8b0000; }
         .btn-danger:active { transform: translateY(4px); box-shadow: none; }
+
         .screen { display: none; }
         .screen.active { display: block; }
-        ul { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; background: #121214; border-radius: 8px; padding: 10px; }
-        li { padding: 8px 12px; border-bottom: 1px solid #29292e; color: #a9a9b3; }
-        .target-box { background: #ff4757; color: white; padding: 20px; border-radius: 12px; font-size: 24px; font-weight: bold; margin: 20px 0; letter-spacing: 1px; }
-        .action-box { background: #29292e; padding: 15px; border-radius: 8px; font-style: italic; border-left: 5px solid #ff872c; text-align: left; margin-bottom: 20px; }
-        .notice { font-size: 12px; color: #7c7c8a; margin-top: 15px; }
         
-        .admin-panel { display: none; margin-top: 30px; padding-top: 15px; border-top: 1px dashed #323238; }
-        .admin-title { font-size: 13px; color: #7c7c8a; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
-        .btn-admin-green { background: #2ed573; color: white; font-size: 14px; padding: 10px; margin-bottom: 8px; }
-        .btn-admin-red { background: #ff4757; color: white; font-size: 14px; padding: 10px; box-shadow: none; }
+        ul { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; background: var(--dark-bg); border-radius: 10px; padding: 10px; border: 1px solid #2d2d35; }
+        li { padding: 10px 12px; border-bottom: 1px solid #232326; color: #c3c3cb; font-weight: 500; }
+        li:last-child { border-bottom: none; }
+        
+        .target-box { 
+            font-family: 'Orbitron', sans-serif;
+            background: var(--danger); 
+            color: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            font-size: 26px; 
+            font-weight: 900; 
+            margin: 20px 0; 
+            letter-spacing: 1px; 
+            box-shadow: var(--text-glow);
+        }
+        
+        .action-box { background: #29292e; padding: 16px; border-radius: 10px; font-style: italic; border-left: 5px solid #ff872c; text-align: left; margin-bottom: 25px; line-height: 1.5; }
+        .notice { font-size: 12px; color: #7c7c8a; margin-top: 20px; }
+        
+        .admin-panel { display: none; margin-top: 35px; padding-top: 20px; border-top: 1px dashed #323238; }
+        .admin-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: #7c7c8a; margin-bottom: 12px; font-weight: 700; letter-spacing: 1px; }
+        .btn-admin-green { background: #2ed573; color: white; font-size: 14px; padding: 12px; margin-bottom: 10px; box-shadow: none; }
+        .btn-admin-red { background: var(--danger); color: white; font-size: 14px; padding: 12px; box-shadow: none; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -36,68 +155,75 @@
 
 <div class="container">
     <div id="scr-login" class="screen active">
-        <h1>SÁT THỦ ẨN DANH</h1>
-        <p>Hệ thống phòng chơi real-time đa nền tảng</p>
-        <input type="text" id="inp-name" placeholder="Nhập tên hiển thị của bạn">
-        <hr style="border: 0; border-top: 1px dashed #323238; margin: 15px 0;">
-        <button class="btn-primary" style="background: #2ed573;" onclick="createRoom()">➕ TẠO PHÒNG CHƠI MỚI</button>
-        <p style="margin: 10px 0; color: #7c7c8a;">- HOẶC -</p>
-        <input type="text" id="inp-room" placeholder="Nhập Mã Phòng (Ví dụ: A8BX)" style="text-transform: uppercase;">
-        <button class="btn-primary" onclick="joinRoom()">DÂN CHƠI VÀO PHÒNG</button>
+        <h1 class="game-title">Sát Thủ Ẩn Danh</h1>
+        <div class="game-subtitle">Hệ thống đấu trường real-time</div>
+        
+        <div id="sub-gate">
+            <input type="text" id="inp-name" placeholder="NHẬP BIỆT DANH CỦA BẠN">
+            <button class="btn-primary" onclick="loginGame()">⚔️ ĐĂNG NHẬP VÀO GAME</button>
+        </div>
+
+        <div id="sub-modes" style="display: none;">
+            <p style="color: #2ed573; font-weight: bold; margin-bottom: 20px;">Chào mừng chiến binh: <span id="txt-user-identity" style="color: #fff;"></span></p>
+            <button class="btn-action" onclick="createRoom()">➕ TẠO PHÒNG CHIẾN MỚI</button>
+            <p style="margin: 15px 0; color: #7c7c8a; font-size: 14px; font-weight: bold;">- HOẶC TÌM PHÒNG -</p>
+            <input type="text" id="inp-room" placeholder="NHẬP MÃ PHÒNG (VÍ DỤ: A8BX)" style="text-transform: uppercase; font-family: 'Orbitron', sans-serif; letter-spacing: 2px;">
+            <button class="btn-primary" onclick="joinRoom()">🚪 TIẾN VÀO PHÒNG CHƠI</button>
+        </div>
     </div>
 
     <div id="scr-lobby" class="screen">
         <h2>🏠 PHÒNG CHỜ REAL-TIME</h2>
         <div class="room-tag">MÃ PHÒNG: <span class="txt-room-id">XXXX</span></div>
-        <p>Gửi mã phòng này cho bạn bè để họ cùng tham gia.</p>
-        <h4 style="text-align: left; margin-bottom: 5px;">Danh sách (<span id="player-count">0</span>):</h4>
+        <p style="font-size: 14px; color: #a9a9b3;">Gửi mã phòng này cho hội bạn Villa để lập trận.</p>
+        <h4 style="text-align: left; margin-bottom: 8px; font-family: 'Orbitron', sans-serif; font-size: 14px;">DANH SÁCH KHỬ MỤC TIÊU (<span id="player-count">0</span>):</h4>
         <ul id="lobby-list"></ul>
         
-        <button id="btn-start" class="btn-primary" style="display: none; background: #2ed573; margin-top: 15px;" onclick="startGame()">🏁 BẮT ĐẦU TRÒ CHƠI</button>
-        <p id="wait-msg" style="color: #00adb5; font-style: italic;">Đang chờ Chủ phòng xuất kích...</p>
+        <button id="btn-start" class="btn-action" style="display: none; margin-top: 15px;" onclick="startGame()">🏁 KÍCH HOẠT TRÒ CHƠI</button>
+        <p id="wait-msg" style="color: var(--primary); font-style: italic; font-size: 14px;">Đang chờ Chủ phòng phát lệnh khởi tranh...</p>
 
         <div class="admin-panel">
-            <div class="admin-title">🛠️ ĐIỀU KHIỂN DÀNH CHO CHỦ PHÒNG</div>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Xóa Sạch Phòng (Hủy phòng)</button>
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ HỦY BỎ PHÒNG CHƠI</button>
         </div>
     </div>
 
     <div id="scr-game" class="screen">
         <div class="room-tag">PHÒNG: <span class="txt-room-id">XXXX</span></div>
         <h2 style="margin-bottom: 5px;">🎯 NHIỆM VỤ CỦA BẠN</h2>
-        <p style="color: #7c7c8a; margin-top: 0;">Tuyệt đối bảo mật điện thoại!</p>
-        <p>Nạn nhân tiếp theo:</p>
-        <div class="target-box" id="target-name">Đang tìm kiếm...</div>
-        <p style="text-align: left; margin-bottom: 5px; font-weight: bold;">Cách thức hành động:</p>
-        <div class="action-box" id="game-action">Đang tải nhiệm vụ...</div>
+        <p style="color: #7c7c8a; margin-top: 0; font-size: 14px;">Tuyệt đối bảo mật màn hình điện thoại!</p>
+        <p style="font-weight: bold; font-size: 15px;">NẠN NHÂN TIẾP THEO:</p>
+        <div class="target-box" id="target-name">Đang săn tìm...</div>
+        <p style="text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 14px;">PHƯƠNG THỨC ÁM SÁT:</p>
+        <div class="action-box" id="game-action">Đang tải dữ liệu...</div>
         <button class="btn-danger" onclick="eliminateMe()">💀 TÔI ĐÃ BỊ HẠ GỤC</button>
         
         <div class="admin-panel">
-            <div class="admin-title">🛠️ ĐIỀU KHIỂN DÀNH CHO CHỦ PHÒNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới (Giữ người)</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Toàn Bộ</button>
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN TRẬN ĐẤU</button>
         </div>
     </div>
 
     <div id="scr-dead" class="screen">
         <div class="room-tag">PHÒNG: <span class="txt-room-id">XXXX</span></div>
-        <h1 style="color: #7c7c8a;">👻 BẠN ĐÃ HY SINH!</h1>
-        <p>Bạn đã bị loại khỏi vòng chiến đấu. Hãy giữ bí mật kẻ đã hạ gục mình...</p>
+        <h1 style="color: #55555a; font-family: 'Orbitron', sans-serif;">👻 BẠN ĐÃ HY SINH!</h1>
+        <p>Bạn đã bị loại khỏi vòng chiến đấu. Hãy im lặng và quan sát cuộc đi săn...</p>
         <div class="admin-panel" style="margin-top: 40px;">
-            <div class="admin-title">🛠️ ĐIỀU KHIỂN DÀNH CHO CHỦ PHÒNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Phòng</button>
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN PHÒNG</button>
         </div>
     </div>
 
     <div id="scr-winner" class="screen">
         <div class="room-tag">PHÒNG: <span class="txt-room-id">XXXX</span></div>
-        <h1 style="color: #ffa502;">🏆 CHIẾN THẮNG !!!</h1>
-        <p>Chúc mừng bạn đã tiêu diệt tất cả mục tiêu và trở thành Sát thủ huyền thoại!</p>
+        <h1 style="color: #ffa502; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 15px rgba(255,165,0,0.6);">🏆 CHIẾN THẮNG T TUYỆT ĐỐI !!!</h1>
+        <p>Chúc mừng bồ đã quét sạch mục tiêu và trở thành Sát thủ huyền thoại ván này!</p>
         <div class="admin-panel" style="margin-top: 40px;">
-            <div class="admin-title">🛠️ ĐIỀU KHIỂN DÀNH CHO CHỦ PHÒNG</div>
-            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 Chơi Hiệp Mới</button>
-            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ Giải Tán Phòng</button>
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN PHÒNG</button>
         </div>
     </div>
 </div>
@@ -135,6 +261,20 @@
         document.getElementById(id).classList.add('active');
     }
 
+    // 🛡️ XỬ LÝ ĐĂNG NHẬP BAN ĐẦU
+    function loginGame() {
+        const nameInput = document.getElementById('inp-name').value.trim();
+        if (!nameInput) return alert("Vui lòng nhập Biệt danh chiến đấu của bồ!");
+        
+        myName = nameInput;
+        localStorage.setItem('assassin_name', myName);
+        
+        // Chuyển sang phần chọn chế độ phòng chơi mượt mà
+        document.getElementById('sub-gate').style.display = 'none';
+        document.getElementById('txt-user-identity').innerText = myName;
+        document.getElementById('sub-modes').style.display = 'block';
+    }
+
     // 🚀 BỘ NÃO TRUNG TÂM PHÒNG CHƠI
     function listenToRoom(id) {
         roomId = id.toUpperCase();
@@ -149,11 +289,14 @@
         roomRef.on('value', (snapshot) => {
             const roomData = snapshot.val();
 
-            // Nếu phòng bị xóa hoặc bị chủ phòng giải tán
             if (!roomData || roomData.state === 'reset') {
                 localStorage.removeItem('assassin_room');
                 roomId = '';
                 if (roomRef) roomRef.off();
+                // Quay lại sảnh chế độ phòng
+                document.getElementById('sub-gate').style.display = 'none';
+                document.getElementById('txt-user-identity').innerText = myName;
+                document.getElementById('sub-modes').style.display = 'block';
                 showScreen('scr-login');
                 return;
             }
@@ -162,18 +305,15 @@
             const players = roomData.players || {};
             let host = roomData.host || '';
 
-            // ⭐ TÍNH NĂNG NÂNG CẤP: CHUYỂN GIAO QUYỀN LỰC (HOST MIGRATION)
-            // Nếu Chủ phòng cũ bị rớt mạng hoặc rời đi (không nằm trong danh sách players nữa)
+            // Tự động chuyển giao Host nếu chủ cũ out phòng
             if (host && !players[host]) {
                 const remainingPlayers = Object.keys(players);
                 if (remainingPlayers.length > 0) {
-                    const newHost = remainingPlayers[0];
-                    db.ref(`rooms/${roomId}/host`).set(newHost);
-                    return; // Ngắt để đợi chu kỳ render tiếp theo từ Firebase gán lại quyền
+                    db.ref(`rooms/${roomId}/host`).set(remainingPlayers[0]);
+                    return;
                 }
             }
 
-            // Phân quyền hiển thị Bảng điều khiển admin cho Host hiện tại
             const isAdmin = (myName && myName === host);
             document.querySelectorAll('.admin-panel').forEach(panel => {
                 panel.style.display = isAdmin ? 'block' : 'none';
@@ -186,7 +326,6 @@
                 waitMsg.style.display = isAdmin ? 'none' : 'block';
             }
 
-            // Nếu vì lý do nào đó tên của mình biến mất khỏi danh sách phòng
             if (!players[myName]) {
                 showScreen('scr-login');
                 return;
@@ -215,7 +354,6 @@
                 } else if (myData.status === 'alive') {
                     const currentTarget = myData.target;
                     
-                    // Cơ chế bắc cầu mục tiêu real-time khi nạn nhân bị hạ gục
                     if (currentTarget && players[currentTarget] && players[currentTarget].status === 'dead') {
                         const nextTarget = players[currentTarget].target;
                         if (nextTarget === myName) {
@@ -235,75 +373,48 @@
         });
     }
 
-    // 🔧 HÀM 1: TẠO PHÒNG MỚI
     function createRoom() {
-        const nameInput = document.getElementById('inp-name').value.trim();
-        if (!nameInput) return alert("Vui lòng nhập tên của bạn trước khi tạo phòng!");
-
         const generatedRoomId = Math.random().toString(36).substring(2, 6).toUpperCase();
-        myName = nameInput;
-
         db.ref(`rooms/${generatedRoomId}`).set({
             state: 'lobby',
             host: myName,
-            players: {
-                [myName]: { status: 'waiting', target: '', action: '' }
-            }
+            players: { [myName]: { status: 'waiting', target: '', action: '' } }
         }).then(() => {
-            // ⭐ TÍNH NĂNG NÂNG CẤP: Tự xóa khi ngắt kết nối (onDisconnect)
             db.ref(`rooms/${generatedRoomId}/players/${myName}`).onDisconnect().remove();
             listenToRoom(generatedRoomId);
         });
     }
 
-    // 🚪 HÀM 2: VÀO PHÒNG CÓ SẴN
     function joinRoom() {
-        const nameInput = document.getElementById('inp-name').value.trim();
         const roomInput = document.getElementById('inp-room').value.trim().toUpperCase();
-
-        if (!nameInput) return alert("Vui lòng nhập tên hiển thị!");
         if (!roomInput) return alert("Vui lòng nhập Mã Phòng chơi!");
 
         db.ref(`rooms/${roomInput}`).once('value', (snapshot) => {
-            if (!snapshot.exists()) {
-                return alert("Mã phòng này không tồn tại bồ ơi!");
-            }
+            if (!snapshot.exists()) return alert("Mã phòng này không tồn tại bồ ơi!");
 
             const roomData = snapshot.val();
             const players = roomData.players || {};
 
-            // ⭐ TÍNH NĂNG NÂNG CẤP: DỌN DẸP PHÒNG MA (GHOST ROOM CLEAN)
-            // Nếu phòng tồn tại trên hệ thống nhưng không có bất kỳ ai ở trong -> Biến nó thành phòng mới do người này làm host
             if (Object.keys(players).length === 0) {
                 db.ref(`rooms/${roomInput}`).set({
                     state: 'lobby',
-                    host: nameInput,
-                    players: {
-                        [nameInput]: { status: 'waiting', target: '', action: '' }
-                    }
+                    host: myName,
+                    players: { [myName]: { status: 'waiting', target: '', action: '' } }
                 }).then(() => {
-                    db.ref(`rooms/${roomInput}/players/${nameInput}`).onDisconnect().remove();
-                    myName = nameInput;
+                    db.ref(`rooms/${roomInput}/players/${myName}`).onDisconnect().remove();
                     listenToRoom(roomInput);
                 });
                 return;
             }
 
-            if (roomData.state === 'playing') {
-                return alert("Phòng này game đang chạy mất rồi bồ ơi!");
-            }
-            if (players[nameInput]) {
-                return alert("Tên này đã có người lấy mất rồi!");
-            }
+            if (roomData.state === 'playing') return alert("Phòng này game đang chạy mất rồi!");
+            if (players[myName]) return alert("Tên của bồ đang bị trùng với một người trong phòng!");
 
-            myName = nameInput;
-            
             db.ref(`rooms/${roomInput}/players/${myName}`).set({
                 status: 'waiting',
                 target: '',
                 action: ''
             }).then(() => {
-                // ⭐ TÍNH NĂNG NÂNG CẤP: Tự xóa khi ngắt kết nối (onDisconnect)
                 db.ref(`rooms/${roomInput}/players/${myName}`).onDisconnect().remove();
                 listenToRoom(roomInput);
             });
@@ -321,7 +432,7 @@
     function startGame() {
         db.ref(`rooms/${roomId}/players`).once('value', (snapshot) => {
             const playersData = snapshot.val();
-            if (!playersData) return alert("Chưa có thần dân nào vào phòng!");
+            if (!playersData) return alert("Chưa có ai vào phòng!");
             
             const playerNames = Object.keys(playersData);
             if (playerNames.length < 3) return alert("Cần tối thiểu 3 người để kích hoạt trò chơi!");
@@ -346,13 +457,13 @@
     }
 
     function eliminateMe() {
-        if (confirm("Xác nhận bạn đã dính bẫy ngoài đời và chấp nhận hy sinh?")) {
+        if (confirm("Xác nhận bồ đã dính bẫy và chấp nhận hy sinh?")) {
             db.ref(`rooms/${roomId}/players/${myName}`).update({ status: 'dead' });
         }
     }
 
     function resetKeepPlayers() {
-        if (confirm("Đưa tất cả về phòng chờ để làm hiệp mới (Giữ nguyên thành viên)?")) {
+        if (confirm("Đưa tất cả về phòng chờ để làm hiệp mới?")) {
             db.ref(`rooms/${roomId}/players`).once('value', (snapshot) => {
                 const players = snapshot.val() || {};
                 const updates = {};
@@ -366,14 +477,19 @@
     }
 
     function resetClearAll() {
-        if (confirm("Hành động này sẽ xóa sổ hoàn toàn phòng này trên hệ thống. Xác nhận?")) {
+        if (confirm("Hành động này sẽ xóa sổ hoàn toàn phòng này. Xác nhận?")) {
             db.ref(`rooms/${roomId}`).set({ state: 'reset' });
         }
     }
 
-    // Tự động kết nối lại nếu bộ nhớ trình duyệt có sẵn thông tin phòng cũ
+    // Khởi động hệ thống kết nối tự động nếu có sẵn thông tin
     if (myName && roomId) {
         listenToRoom(roomId);
+    } else if (myName) {
+        document.getElementById('sub-gate').style.display = 'none';
+        document.getElementById('txt-user-identity').innerText = myName;
+        document.getElementById('sub-modes').style.display = 'block';
+        showScreen('scr-login');
     } else {
         showScreen('scr-login');
     }
