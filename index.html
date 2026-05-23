@@ -354,8 +354,10 @@
             const players = roomData.players || {};
             let host = roomData.host || '';
 
+            // Nếu người bị kick là host hiện tại, chuyển quyền host
             if (host && !players[host]) {
-                const remainingPlayers = Object.keys(players);
+                // Lọc bỏ những "bóng ma" để lấy danh sách người chơi thực sự
+                const remainingPlayers = Object.keys(players).filter(p => players[p].status);
                 if (remainingPlayers.length > 0) {
                     db.ref(`rooms/${roomId}/host`).set(remainingPlayers[0]);
                     return;
@@ -374,8 +376,11 @@
                 waitMsg.style.display = isAdmin ? 'none' : 'block';
             }
 
-            // XỬ LÝ KHI NGƯỜI CHƠI BỊ KICK KHỎI PHÒNG
-            if (!players[myName]) {
+            // XỬ LÝ KHI NGƯỜI CHƠI BỊ KICK - FIX LỖI GHOST NODE
+            if (!players[myName] || !players[myName].status) {
+                // Hủy lệnh onDisconnect cũ trên máy chủ để không tái sinh bóng ma
+                db.ref(`rooms/${roomId}/players/${myName}/online`).onDisconnect().cancel();
+                
                 alert("Bạn đã bị Chủ phòng mời ra khỏi phòng!");
                 localStorage.removeItem('assassin_room');
                 roomId = '';
@@ -394,6 +399,13 @@
                 listEl.innerHTML = '';
                 let count = 0;
                 for (let p in players) {
+                    // LỌC BÓNG MA: Nếu node chỉ có online: false mà không có dữ liệu game
+                    if (!players[p].status) {
+                        // Nhờ Chủ phòng xóa sạch rác này trên database luôn
+                        if (isAdmin) db.ref(`rooms/${roomId}/players/${p}`).remove();
+                        continue;
+                    }
+
                     let li = document.createElement('li');
                     let statusBadge = players[p].online 
                         ? '<span class="status-badge status-online">Online</span>' 
@@ -401,7 +413,6 @@
                         
                     let displayName = (p === host) ? `👑 ${p}` : `• ${p}`;
                     
-                    // HIỂN THỊ NÚT KICK CHO CHỦ PHÒNG TRONG LOBBY
                     let kickBtnHtml = '';
                     if (isAdmin && p !== myName) {
                         kickBtnHtml = `<button class="host-kick-btn" onclick="kickPlayerFromLobby('${p}')">Đuổi</button>`;
@@ -420,6 +431,9 @@
                     adminList.innerHTML = '<div style="font-size:12px; color:#7c7c8a; margin-bottom:8px;">MỤC TIÊU MẤT KẾT NỐI:</div>';
                     let hasOffline = false;
                     for (let p in players) {
+                        // Bỏ qua bóng ma
+                        if (!players[p].status) continue;
+                        
                         if (players[p].status === 'alive' && p !== myName && !players[p].online) {
                             hasOffline = true;
                             adminList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom: 1px solid #323238; padding-bottom: 5px;">
@@ -497,7 +511,8 @@
             }
 
             if (roomData.state === 'playing') return alert("Phòng này game đang chạy mất rồi!");
-            if (players[myName]) return alert("Tên của bạn đang bị trùng với một người trong phòng!");
+            // Đảm bảo không bị chặn bởi bóng ma (nếu trùng tên bóng ma thì vẫn cho vào và đè dữ liệu lên)
+            if (players[myName] && players[myName].status) return alert("Tên của bạn đang bị trùng với một người trong phòng!");
 
             db.ref(`rooms/${roomInput}/players/${myName}`).set({
                 status: 'waiting',
@@ -524,8 +539,10 @@
             const playersData = snapshot.val();
             if (!playersData) return alert("Chưa có ai vào phòng!");
             
-            const playerNames = Object.keys(playersData);
-            if (playerNames.length < 3) return alert("Cần tối thiểu 3 người để kích hoạt trò chơi!");
+            // Lọc bỏ bóng ma khi chia mục tiêu
+            const playerNames = Object.keys(playersData).filter(p => playersData[p].status);
+            
+            if (playerNames.length < 3) return alert("Cần tối thiểu 3 người (không tính bóng ma) để kích hoạt trò chơi!");
 
             const shuffled = shuffle([...playerNames]);
             const updates = {};
@@ -559,7 +576,6 @@
         }
     }
 
-    // TÍNH NĂNG MỚI: KICK NGƯỜI CHƠI KHỎI LOBBY
     function kickPlayerFromLobby(targetName) {
         if (confirm(`Bạn có chắc chắn muốn đuổi [${targetName}] ra khỏi phòng chờ không?`)) {
             db.ref(`rooms/${roomId}/players/${targetName}`).remove();
@@ -572,6 +588,7 @@
                 const players = snapshot.val() || {};
                 const updates = {};
                 for (let p in players) {
+                    if (!players[p].status) continue; // Không reset bóng ma
                     updates[`rooms/${roomId}/players/${p}`] = { 
                         status: 'waiting', 
                         target: '', 
