@@ -189,7 +189,7 @@
         <h2>⛩️ TRẠM TRUNG CHUYỂN </h2>
         <div class="room-tag">MÃ PHÒNG: <span class="txt-room-id">XXXX</span></div>
         <p style="font-size: 14px; color: #a9a9b3;">Gửi mã phòng này cho hội bạn để lập trận.</p>
-        <h4 style="text-align: left; margin-bottom: 8px; font-size: 14px; text-transform: uppercase;">DANH SÁCH KHỬ MỤC TIÊU (<span id="player-count" style="font-family:'Orbitron'; font-weight:900;">0</span>):</h4>
+        <h4 style="text-align: left; margin-bottom: 8px; font-size: 14px; text-transform: uppercase;">DANH SÁCH MỤC TIÊU TRỪ KHỬ (<span id="player-count" style="font-family:'Orbitron'; font-weight:900;">0</span>):</h4>
         <ul id="lobby-list"></ul>
         
         <button id="btn-start" class="btn-action" style="display: none; margin-top: 15px;" onclick="startGame()">🏁 KÍCH HOẠT TRÒ CHƠI</button>
@@ -260,27 +260,27 @@
     let roomRef = null;
 
     const actionPool = [
-        // "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
+        "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
         // "Khen nạn nhân một câu liên quan đến ngoại hình/trang phục và được họ nói 'Cảm ơn'.",
-        // "Ôm nạn nhân 1 cái.",
-        // "Xoa nạn nhân 1 cái.",
-        // "Ngồi bên cạnh nạn nhân trong 10s.",
-        // "Mắt đối mắt với nạn nhân trong 4s (bạn nhìn nạn nhân và họ cũng nhìn bạn trong 4s).",
-        // "Nạn nhân chửi thề, nói tục.",
-        // "Xin ăn ké hoặc uống ké một ngụm nước trực tiếp từ phần đồ ăn/ly nước riêng của nạn nhân.",
-        // "Khiến nạn nhân gọi tên bạn (tên cúng cơm hoặc biệt danh).",
-        // "Khiến nạn nhân nói từ 'ôk' hoặc 'được'.",
-        // "Khiến nạn nhân nói từ 'không' hoặc 'thôi' hoặc 'đừng'.",
-        // "Gọi điện cho nạn nhân và họ bắt máy.",
-        // "Nhéo má nạn nhân 1 cái.",
-        // "Nếu bạn cùng giới tính với nạn nhân thì tét đít họ 1 cái, nếu không thì đập tay (High-five) với nạn nhân 1 cái.",
-        // "Làm nạn nhân nhìn theo hướng bạn chỉ.",
+        "Ôm nạn nhân 1 cái.",
+        "Xoa nạn nhân 1 cái.",
+        "Ngồi bên cạnh nạn nhân trong 10s.",
+        "Mắt đối mắt với nạn nhân trong 4s (bạn nhìn nạn nhân và họ cũng nhìn bạn trong 4s).",
+        "Nạn nhân chửi thề, nói tục.",
+        "Xin ăn ké hoặc uống ké một ngụm nước trực tiếp từ phần đồ ăn/ly nước riêng của nạn nhân.",
+        "Khiến nạn nhân gọi tên bạn (tên cúng cơm hoặc biệt danh).",
+        "Khiến nạn nhân nói từ \"ôk\" hoặc \"được\".",
+        "Khiến nạn nhân nói từ \"không\" hoặc \"thôi\" hoặc \"đừng\".",
+        "Gọi điện cho nạn nhân và họ bắt máy.",
+        "Nhéo má nạn nhân 1 cái.",
+        "Nếu bạn cùng giới tính với nạn nhân thì tét đít họ 1 cái, nếu không thì đập tay (High-five) với nạn nhân 1 cái.",
+        "Làm nạn nhân nhìn theo hướng bạn chỉ.",
         "Khiến nạn nhân đồng ý với một nhận định vô lý của bạn (Ví dụ: \"Nay nóng kinh khủng\" dù trời đang mát).",
-        // "Rủ nạn nhân chụp chung một tấm ảnh selfie bằng máy điện thoại của bạn thành công.",
-        // "Đập tay (High-five) với nạn nhân vì bất kỳ lý do gì.",
-        // "Mượn điện thoại của nạn nhân để xem giờ hoặc xem một thứ gì đó thành công.",
+        "Rủ nạn nhân chụp chung một tấm ảnh selfie bằng máy điện thoại của bạn thành công.",
+        "Đập tay (High-five) với nạn nhân vì bất kỳ lý do gì.",
+        "Mượn điện thoại của nạn nhân để xem giờ hoặc xem một thứ gì đó thành công.",
         // "Khiến nạn nhân hát hoặc nhẩm theo một câu hát mà bạn vừa chủ động ngân nga.",
-        // "Nhờ nạn nhân mở hộ nắp một chai nước hoặc lon nước ngọt."
+        "Nhờ nạn nhân mở hộ nắp một chai nước hoặc lon nước ngọt."
     ];
 
     function showScreen(id) {
