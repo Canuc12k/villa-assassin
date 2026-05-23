@@ -11,6 +11,7 @@
         :root {
             --primary: #00adb5;
             --danger: #ff4757;
+            --warning: #ffa502;
             --dark-bg: #121214;
             --card-bg: #1c1c1f;
             --text-glow: 0 0 12px rgba(255, 71, 87, 0.6);
@@ -37,6 +38,7 @@
             border-radius: 20px; 
             box-shadow: 0 12px 40px rgba(0,0,0,0.6); 
             border: 1px solid #2a2a30; 
+            position: relative;
         }
 
         h1.game-title { 
@@ -115,15 +117,20 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        
+        button:disabled {
+            cursor: not-allowed;
+            transform: none !important;
+        }
 
         .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px rgba(0, 136, 143, 1); }
-        .btn-primary:active { transform: translateY(3px); box-shadow: none; }
+        .btn-primary:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
         
         .btn-action { background: #2ed573; color: white; box-shadow: 0 4px #21a455; }
-        .btn-action:active { transform: translateY(3px); box-shadow: none; }
+        .btn-action:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
 
         .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px #8b0000; }
-        .btn-danger:active { transform: translateY(4px); box-shadow: none; }
+        .btn-danger:active:not(:disabled) { transform: translateY(4px); box-shadow: none; }
 
         .screen { display: none; }
         .screen.active { display: block; }
@@ -160,6 +167,21 @@
         .status-offline { background: rgba(255, 71, 87, 0.2); color: var(--danger); }
         .host-kick-btn { background: var(--danger); border: none; color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-left: 8px;}
         .host-kick-btn:active { transform: scale(0.95); }
+
+        /* Modal cho Xác nhận giết */
+        #modal-kill-confirm {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.95); z-index: 999; 
+            display: none; flex-direction: column; justify-content: center; align-items: center; 
+            padding: 20px; box-sizing: border-box;
+        }
+        
+        .fail-counter {
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -213,7 +235,10 @@
         <div class="target-box" id="target-name">Đang săn tìm...</div>
         <p style="text-align: left; margin-bottom: 5px; font-weight: bold; font-size: 14px; text-transform: uppercase;">PHƯƠNG THỨC ÁM SÁT:</p>
         <div class="action-box" id="game-action">Đang tải dữ liệu...</div>
-        <button class="btn-danger" onclick="eliminateMe()">💀 TÔI ĐÃ BỊ HẠ GỤC</button>
+        
+        <button id="btn-report-kill" class="btn-primary" onclick="reportKill()">🔪 BÁO CÁO HOÀN THÀNH NHIỆM VỤ</button>
+        <div id="fail-status" class="fail-counter"></div>
+        <button class="btn-danger" style="margin-top: 15px;" onclick="eliminateMe()">💀 TÔI ĐÃ DÍNH BẪY NGƯỜI KHÁC</button>
         
         <div class="admin-panel">
             <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
@@ -234,15 +259,36 @@
         </div>
     </div>
 
+    <div id="scr-fired" class="screen">
+        <div class="room-tag">PHÒNG: <span class="txt-room-id">XXXX</span></div>
+        <h1 style="color: var(--danger);">❌ BỊ LOẠI</h1>
+        <p style="font-size: 16px; font-weight: 500;">Bạn đã bị tổ chức loại bỏ vì sự yếu kém của mình.</p>
+        <p style="color: #a9a9b3;">Hãy giữ yên lặng và chờ kết thúc cuộc chơi.</p>
+        <div class="admin-panel" style="margin-top: 40px;">
+            <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
+            <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN PHÒNG</button>
+        </div>
+    </div>
+
     <div id="scr-winner" class="screen">
         <div class="room-tag">PHÒNG: <span class="txt-room-id">XXXX</span></div>
-        <h1 style="color: #ffa502; text-shadow: 0 0 15px rgba(255,165,0,0.6);">🏆 CHIẾN THẮNG TUYỆT ĐỐI !!!</h1>
+        <h1 style="color: var(--warning); text-shadow: 0 0 15px rgba(255,165,0,0.6);">🏆 CHIẾN THẮNG TUYỆT ĐỐI !!!</h1>
         <p>Chúc mừng bạn đã quét sạch mục tiêu và trở thành Sát thủ huyền thoại ván này!</p>
         <div class="admin-panel" style="margin-top: 40px;">
             <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
             <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
             <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN PHÒNG</button>
         </div>
+    </div>
+
+    <div id="modal-kill-confirm">
+        <h2 style="color:var(--danger); font-size:26px; margin-bottom: 5px;">⚠️ BỊ ÁM SÁT!</h2>
+        <p style="font-size: 15px;">Mục tiêu <span id="modal-kill-by" style="color: var(--primary); font-weight: bold;"></span> vừa báo cáo đã hạ gục bạn bằng hành động:</p>
+        <div class="action-box" id="modal-kill-action" style="font-size:16px; color:#fff; width: 100%; max-width: 350px;"></div>
+        <p style="font-size:14px; color:#a9a9b3; margin-bottom: 25px;">Bạn có xác nhận mình đã bị dính bẫy không?</p>
+        <button class="btn-danger" style="max-width: 350px;" onclick="respondKill(true)">💀 ĐÚNG, TÔI ĐÃ BỊ HẠ GỤC</button>
+        <button class="btn-action" style="max-width: 350px; background: #55555a; box-shadow: 0 4px #323238;" onclick="respondKill(false)">🙅 KHÔNG, CHƯA HỀ XẢY RA</button>
     </div>
 </div>
 
@@ -263,6 +309,7 @@
     let myName = localStorage.getItem('assassin_name') || '';
     let roomId = localStorage.getItem('assassin_room') || '';
     let roomRef = null;
+    let currentPlayersData = {}; // Biến lưu tạm dữ liệu toàn phòng
 
     const actionPool = [
         "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
@@ -342,6 +389,7 @@
                 localStorage.removeItem('assassin_room');
                 roomId = '';
                 if (roomRef) roomRef.off();
+                document.getElementById('modal-kill-confirm').style.display = 'none';
                 
                 document.getElementById('sub-gate').style.display = 'none';
                 document.getElementById('txt-user-identity').innerText = myName;
@@ -352,11 +400,10 @@
 
             const state = roomData.state || 'lobby';
             const players = roomData.players || {};
+            currentPlayersData = players; // Lưu lại để dùng cho hàm hoàn thành NV
             let host = roomData.host || '';
 
-            // Nếu người bị kick là host hiện tại, chuyển quyền host
             if (host && !players[host]) {
-                // Lọc bỏ những "bóng ma" để lấy danh sách người chơi thực sự
                 const remainingPlayers = Object.keys(players).filter(p => players[p].status);
                 if (remainingPlayers.length > 0) {
                     db.ref(`rooms/${roomId}/host`).set(remainingPlayers[0]);
@@ -376,11 +423,9 @@
                 waitMsg.style.display = isAdmin ? 'none' : 'block';
             }
 
-            // XỬ LÝ KHI NGƯỜI CHƠI BỊ KICK - FIX LỖI GHOST NODE
             if (!players[myName] || !players[myName].status) {
-                // Hủy lệnh onDisconnect cũ trên máy chủ để không tái sinh bóng ma
                 db.ref(`rooms/${roomId}/players/${myName}/online`).onDisconnect().cancel();
-                
+                document.getElementById('modal-kill-confirm').style.display = 'none';
                 alert("Bạn đã bị Chủ phòng mời ra khỏi phòng!");
                 localStorage.removeItem('assassin_room');
                 roomId = '';
@@ -395,13 +440,12 @@
             const myData = players[myName];
 
             if (state === 'lobby') {
+                document.getElementById('modal-kill-confirm').style.display = 'none';
                 const listEl = document.getElementById('lobby-list');
                 listEl.innerHTML = '';
                 let count = 0;
                 for (let p in players) {
-                    // LỌC BÓNG MA: Nếu node chỉ có online: false mà không có dữ liệu game
                     if (!players[p].status) {
-                        // Nhờ Chủ phòng xóa sạch rác này trên database luôn
                         if (isAdmin) db.ref(`rooms/${roomId}/players/${p}`).remove();
                         continue;
                     }
@@ -431,7 +475,6 @@
                     adminList.innerHTML = '<div style="font-size:12px; color:#7c7c8a; margin-bottom:8px;">MỤC TIÊU MẤT KẾT NỐI:</div>';
                     let hasOffline = false;
                     for (let p in players) {
-                        // Bỏ qua bóng ma
                         if (!players[p].status) continue;
                         
                         if (players[p].status === 'alive' && p !== myName && !players[p].online) {
@@ -445,7 +488,18 @@
                     if(!hasOffline) adminList.innerHTML += '<div style="font-size:13px; color:#2ed573;">Tất cả đều đang online.</div>';
                 }
 
-                if (myData.status === 'dead') {
+                // XỬ LÝ KHI CÓ NGƯỜI BÁO CÁO MÌNH ĐÃ BỊ GIẾT
+                if (myData.killRequest && myData.status === 'alive') {
+                    document.getElementById('modal-kill-by').innerText = myData.killRequest.by;
+                    document.getElementById('modal-kill-action').innerText = myData.killRequest.action;
+                    document.getElementById('modal-kill-confirm').style.display = 'flex';
+                } else {
+                    document.getElementById('modal-kill-confirm').style.display = 'none';
+                }
+
+                if (myData.status === 'eliminated_by_org') {
+                    showScreen('scr-fired');
+                } else if (myData.status === 'dead') {
                     showScreen('scr-dead');
                 } else if (myData.status === 'winner') {
                     showScreen('scr-winner');
@@ -457,19 +511,45 @@
 
                     const currentTarget = myData.target;
                     
-                    if (currentTarget && players[currentTarget] && players[currentTarget].status === 'dead') {
+                    // CHUỖI KẾ THỪA: Nếu mục tiêu bị chết HOẶC bị tổ chức loại, lấy mục tiêu tiếp theo
+                    if (currentTarget && players[currentTarget] && (players[currentTarget].status === 'dead' || players[currentTarget].status === 'eliminated_by_org')) {
                         const nextTarget = players[currentTarget].target;
                         if (nextTarget === myName) {
                             db.ref(`rooms/${roomId}/players/${myName}`).update({ status: 'winner' });
                             return;
                         } else if (nextTarget && nextTarget !== currentTarget) {
-                            db.ref(`rooms/${roomId}/players/${myName}`).update({ target: nextTarget });
+                            // Cập nhật mục tiêu mới và reset số lần thất bại về 0
+                            db.ref(`rooms/${roomId}/players/${myName}`).update({ 
+                                target: nextTarget,
+                                fails: 0
+                            });
                             return;
                         }
                     }
 
                     document.getElementById('game-action').innerText = myData.action || '';
                     document.getElementById('target-name').innerText = currentTarget || '';
+                    
+                    // Hiển thị số lần thất bại
+                    let failsCount = myData.fails || 0;
+                    if(failsCount > 0) {
+                        document.getElementById('fail-status').innerText = `⚠️ Bị mục tiêu từ chối: ${failsCount}/3 lần (Đổi cách ám sát mới)`;
+                    } else {
+                        document.getElementById('fail-status').innerText = "";
+                    }
+
+                    // Cập nhật trạng thái nút bấm Hoàn thành
+                    const btnReport = document.getElementById('btn-report-kill');
+                    if (currentTarget && players[currentTarget] && players[currentTarget].killRequest && players[currentTarget].killRequest.by === myName) {
+                        btnReport.innerText = "⏳ ĐANG CHỜ MỤC TIÊU XÁC NHẬN...";
+                        btnReport.disabled = true;
+                        btnReport.style.opacity = '0.5';
+                    } else {
+                        btnReport.innerText = "🔪 BÁO CÁO HOÀN THÀNH NHIỆM VỤ";
+                        btnReport.disabled = false;
+                        btnReport.style.opacity = '1';
+                    }
+
                     showScreen('scr-game');
                 }
             }
@@ -481,7 +561,7 @@
         db.ref(`rooms/${generatedRoomId}`).set({
             state: 'lobby',
             host: myName,
-            players: { [myName]: { status: 'waiting', target: '', action: '', online: true } }
+            players: { [myName]: { status: 'waiting', target: '', action: '', online: true, fails: 0, killRequest: null } }
         }).then(() => {
             sessionStorage.setItem('tab_active', 'true');
             listenToRoom(generatedRoomId);
@@ -502,7 +582,7 @@
                 db.ref(`rooms/${roomInput}`).set({
                     state: 'lobby',
                     host: myName,
-                    players: { [myName]: { status: 'waiting', target: '', action: '', online: true } }
+                    players: { [myName]: { status: 'waiting', target: '', action: '', online: true, fails: 0, killRequest: null } }
                 }).then(() => {
                     sessionStorage.setItem('tab_active', 'true');
                     listenToRoom(roomInput);
@@ -511,14 +591,15 @@
             }
 
             if (roomData.state === 'playing') return alert("Phòng này game đang chạy mất rồi!");
-            // Đảm bảo không bị chặn bởi bóng ma (nếu trùng tên bóng ma thì vẫn cho vào và đè dữ liệu lên)
             if (players[myName] && players[myName].status) return alert("Tên của bạn đang bị trùng với một người trong phòng!");
 
             db.ref(`rooms/${roomInput}/players/${myName}`).set({
                 status: 'waiting',
                 target: '',
                 action: '',
-                online: true
+                online: true,
+                fails: 0,
+                killRequest: null
             }).then(() => {
                 sessionStorage.setItem('tab_active', 'true');
                 listenToRoom(roomInput);
@@ -539,9 +620,7 @@
             const playersData = snapshot.val();
             if (!playersData) return alert("Chưa có ai vào phòng!");
             
-            // Lọc bỏ bóng ma khi chia mục tiêu
             const playerNames = Object.keys(playersData).filter(p => playersData[p].status);
-            
             if (playerNames.length < 3) return alert("Cần tối thiểu 3 người (không tính bóng ma) để kích hoạt trò chơi!");
 
             const shuffled = shuffle([...playerNames]);
@@ -556,12 +635,72 @@
                     status: 'alive',
                     target: targetPlayer,
                     action: randomAction,
-                    online: true
+                    online: true,
+                    fails: 0,
+                    killRequest: null
                 };
             }
             updates[`rooms/${roomId}/state`] = 'playing';
             db.ref().update(updates);
         });
+    }
+
+    // TÍNH NĂNG MỚI: BÁO CÁO ĐÃ HOÀN THÀNH
+    function reportKill() {
+        const myData = currentPlayersData[myName];
+        if(!myData || !myData.target) return;
+
+        db.ref(`rooms/${roomId}/players/${myData.target}`).update({
+            killRequest: {
+                by: myName,
+                action: myData.action
+            }
+        });
+    }
+
+    // TÍNH NĂNG MỚI: NẠN NHÂN PHẢN HỒI LẠI BÁO CÁO
+    function respondKill(isAccepted) {
+        const myData = currentPlayersData[myName];
+        if (!myData || !myData.killRequest) return;
+        
+        const assassinName = myData.killRequest.by;
+        const assassinAction = myData.killRequest.action;
+        
+        if (isAccepted) {
+            // Nạn nhân đồng ý là đã chết
+            db.ref(`rooms/${roomId}/players/${myName}`).update({ 
+                status: 'dead',
+                killRequest: null
+            });
+            document.getElementById('modal-kill-confirm').style.display = 'none';
+        } else {
+            // Nạn nhân từ chối!
+            db.ref(`rooms/${roomId}/players/${assassinName}`).once('value', snapshot => {
+                const assassinData = snapshot.val();
+                if (!assassinData) return;
+                
+                let fails = (assassinData.fails || 0) + 1;
+                let updates = {};
+                updates[`rooms/${roomId}/players/${myName}/killRequest`] = null; // Xóa thông báo cho nạn nhân
+                
+                if (fails >= 3) {
+                    // Sát thủ thất bại 3 lần -> Bị loại
+                    updates[`rooms/${roomId}/players/${assassinName}/status`] = 'eliminated_by_org';
+                } else {
+                    // Cấp hành động mới ngẫu nhiên (không trùng cái cũ)
+                    let newAction;
+                    do {
+                        newAction = actionPool[Math.floor(Math.random() * actionPool.length)];
+                    } while (newAction === assassinAction);
+                    
+                    updates[`rooms/${roomId}/players/${assassinName}/fails`] = fails;
+                    updates[`rooms/${roomId}/players/${assassinName}/action`] = newAction;
+                }
+                
+                db.ref().update(updates);
+            });
+            document.getElementById('modal-kill-confirm').style.display = 'none';
+        }
     }
 
     function eliminateMe() {
@@ -588,12 +727,14 @@
                 const players = snapshot.val() || {};
                 const updates = {};
                 for (let p in players) {
-                    if (!players[p].status) continue; // Không reset bóng ma
+                    if (!players[p].status) continue;
                     updates[`rooms/${roomId}/players/${p}`] = { 
                         status: 'waiting', 
                         target: '', 
                         action: '',
-                        online: players[p].online || false
+                        online: players[p].online || false,
+                        fails: 0,
+                        killRequest: null
                     };
                 }
                 updates[`rooms/${roomId}/state`] = 'lobby';
