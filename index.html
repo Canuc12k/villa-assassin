@@ -39,7 +39,6 @@
             border: 1px solid #2a2a30; 
         }
 
-        /* 👑 TÊN GAME PVP KHÔNG LO LỖI FONT VÌ DÙNG CHAKRA PETCH HIỆU ỨNG NEON */
         h1.game-title { 
             font-family: 'Chakra Petch', sans-serif;
             font-weight: 700;
@@ -75,7 +74,6 @@
             margin-bottom: 15px; 
         }
         
-        /* Chỉ sử dụng Orbitron cho Mã Phòng thuần chữ số không dấu */
         .txt-room-id {
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
@@ -131,7 +129,7 @@
         .screen.active { display: block; }
         
         ul { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; background: var(--dark-bg); border-radius: 10px; padding: 10px; border: 1px solid #2d2d35; }
-        li { padding: 10px 12px; border-bottom: 1px solid #232326; color: #c3c3cb; font-weight: 500; }
+        li { padding: 10px 12px; border-bottom: 1px solid #232326; color: #c3c3cb; font-weight: 500; display: flex; justify-content: space-between;}
         li:last-child { border-bottom: none; }
         
         .target-box { 
@@ -156,6 +154,11 @@
         .btn-admin-red { background: var(--danger); color: white; font-size: 14px; padding: 12px; box-shadow: none; }
         
         .logout-link { color: var(--danger); font-size: 13px; text-decoration: underline; cursor: pointer; font-weight: bold; letter-spacing: 0.5px; display: inline-block; margin-bottom: 20px; }
+        
+        .status-badge { font-size: 11px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
+        .status-online { background: rgba(46, 213, 115, 0.2); color: #2ed573; }
+        .status-offline { background: rgba(255, 71, 87, 0.2); color: var(--danger); }
+        .host-kick-btn { background: var(--danger); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -213,6 +216,7 @@
         
         <div class="admin-panel">
             <div class="admin-title">🛠️ BẢNG ĐIỀU KHIỂN CHỦ PHÒNG</div>
+            <div id="admin-player-list" style="margin-bottom: 15px; text-align: left;"></div>
             <button class="btn-admin-green" onclick="resetKeepPlayers()">🔄 KHỞI ĐỘNG HIỆP MỚI</button>
             <button class="btn-admin-red" onclick="resetClearAll()">🗑️ GIẢI TÁN TRẬN ĐẤU</button>
         </div>
@@ -261,7 +265,6 @@
 
     const actionPool = [
         "Đưa cho nạn nhân một vật bất kỳ (ly nước, khăn giấy, quả quýt...) và họ chủ động nhận lấy.",
-        // "Khen nạn nhân một câu liên quan đến ngoại hình/trang phục và được họ nói 'Cảm ơn'.",
         "Ôm nạn nhân 1 cái.",
         "Xoa nạn nhân 1 cái.",
         "Ngồi bên cạnh nạn nhân trong 10s.",
@@ -290,7 +293,6 @@
         "Chơi game cùng nạn nhân và làm họ thắng.",
         "Mượn chìa khóa xe của nạn nhân hoặc cụng ly với nạn nhân.",
         "Đề cử nạn nhân tham gia văn nghệ (múa, hát, nhảy) và họ làm.",
-        // "Khiến nạn nhân hát hoặc nhẩm theo một câu hát mà bạn vừa chủ động ngân nga.",
         "Nhờ nạn nhân mở hộ nắp một chai nước hoặc lon nước ngọt."
     ];
 
@@ -328,6 +330,10 @@
 
         if (roomRef) roomRef.off();
         roomRef = db.ref(`rooms/${roomId}`);
+        
+        // Thiết lập OnDisconnect để chuyển trạng thái online thành false thay vì xóa hẳn người chơi
+        db.ref(`rooms/${roomId}/players/${myName}/online`).onDisconnect().set(false);
+        db.ref(`rooms/${roomId}/players/${myName}`).update({ online: true });
         
         roomRef.on('value', (snapshot) => {
             const roomData = snapshot.val();
@@ -381,7 +387,12 @@
                 let count = 0;
                 for (let p in players) {
                     let li = document.createElement('li');
-                    li.innerText = (p === host) ? `👑 ${p} (Chủ phòng)` : `• ${p} (Sẵn sàng)`;
+                    let statusBadge = players[p].online 
+                        ? '<span class="status-badge status-online">Online</span>' 
+                        : '<span class="status-badge status-offline">Offline</span>';
+                        
+                    let displayName = (p === host) ? `👑 ${p}` : `• ${p}`;
+                    li.innerHTML = `<span>${displayName}</span> ${statusBadge}`;
                     listEl.appendChild(li);
                     count++;
                 }
@@ -389,11 +400,37 @@
                 showScreen('scr-lobby');
                 
             } else if (state === 'playing') {
+                
+                // HIỂN THỊ DANH SÁCH OFFLINE CHO CHỦ PHÒNG KICK
+                if (isAdmin) {
+                    const adminList = document.getElementById('admin-player-list');
+                    adminList.innerHTML = '<div style="font-size:12px; color:#7c7c8a; margin-bottom:8px;">MỤC TIÊU MẤT KẾT NỐI:</div>';
+                    let hasOffline = false;
+                    for (let p in players) {
+                        if (players[p].status === 'alive' && p !== myName && !players[p].online) {
+                            hasOffline = true;
+                            adminList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom: 1px solid #323238; padding-bottom: 5px;">
+                                <span style="font-size:14px; color:#c3c3cb;">${p} <span class="status-badge status-offline" style="margin-left:5px;">Rớt mạng</span></span>
+                                <button class="host-kick-btn" onclick="hostEliminatePlayer('${p}')">Loại bỏ</button>
+                            </div>`;
+                        }
+                    }
+                    if(!hasOffline) adminList.innerHTML += '<div style="font-size:13px; color:#2ed573;">Tất cả đều đang online.</div>';
+                }
+
                 if (myData.status === 'dead') {
                     showScreen('scr-dead');
                 } else if (myData.status === 'winner') {
                     showScreen('scr-winner');
                 } else if (myData.status === 'alive') {
+                    
+                    // --- TÍNH NĂNG CHỐNG THOÁT GAME ---
+                    // Nếu sessionStorage không tồn tại (xóa tab và mở lại), xử tử lập tức
+                    if (!sessionStorage.getItem('tab_active')) {
+                        db.ref(`rooms/${roomId}/players/${myName}`).update({ status: 'dead' });
+                        return; // Ngừng chạy tiếp, vòng lặp sau sẽ đẩy qua màn hình Báo tử
+                    }
+
                     const currentTarget = myData.target;
                     
                     if (currentTarget && players[currentTarget] && players[currentTarget].status === 'dead') {
@@ -420,9 +457,9 @@
         db.ref(`rooms/${generatedRoomId}`).set({
             state: 'lobby',
             host: myName,
-            players: { [myName]: { status: 'waiting', target: '', action: '' } }
+            players: { [myName]: { status: 'waiting', target: '', action: '', online: true } }
         }).then(() => {
-            db.ref(`rooms/${generatedRoomId}/players/${myName}`).onDisconnect().remove();
+            sessionStorage.setItem('tab_active', 'true');
             listenToRoom(generatedRoomId);
         });
     }
@@ -441,9 +478,9 @@
                 db.ref(`rooms/${roomInput}`).set({
                     state: 'lobby',
                     host: myName,
-                    players: { [myName]: { status: 'waiting', target: '', action: '' } }
+                    players: { [myName]: { status: 'waiting', target: '', action: '', online: true } }
                 }).then(() => {
-                    db.ref(`rooms/${roomInput}/players/${myName}`).onDisconnect().remove();
+                    sessionStorage.setItem('tab_active', 'true');
                     listenToRoom(roomInput);
                 });
                 return;
@@ -455,9 +492,10 @@
             db.ref(`rooms/${roomInput}/players/${myName}`).set({
                 status: 'waiting',
                 target: '',
-                action: ''
+                action: '',
+                online: true
             }).then(() => {
-                db.ref(`rooms/${roomInput}/players/${myName}`).onDisconnect().remove();
+                sessionStorage.setItem('tab_active', 'true');
                 listenToRoom(roomInput);
             });
         });
@@ -490,7 +528,8 @@
                 updates[`rooms/${roomId}/players/${currentPlayer}`] = {
                     status: 'alive',
                     target: targetPlayer,
-                    action: randomAction
+                    action: randomAction,
+                    online: true
                 };
             }
             updates[`rooms/${roomId}/state`] = 'playing';
@@ -503,6 +542,13 @@
             db.ref(`rooms/${roomId}/players/${myName}`).update({ status: 'dead' });
         }
     }
+    
+    // Tính năng mới cho Chủ phòng: Loại người chơi thoát ngang
+    function hostEliminatePlayer(targetName) {
+        if (confirm(`Người chơi [${targetName}] đang mất kết nối. Bạn muốn loại trực tiếp để nối lại vòng chơi?`)) {
+            db.ref(`rooms/${roomId}/players/${targetName}`).update({ status: 'dead' });
+        }
+    }
 
     function resetKeepPlayers() {
         if (confirm("Đưa tất cả về phòng chờ để làm hiệp mới?")) {
@@ -510,7 +556,12 @@
                 const players = snapshot.val() || {};
                 const updates = {};
                 for (let p in players) {
-                    updates[`rooms/${roomId}/players/${p}`] = { status: 'waiting', target: '', action: '' };
+                    updates[`rooms/${roomId}/players/${p}`] = { 
+                        status: 'waiting', 
+                        target: '', 
+                        action: '',
+                        online: players[p].online || false
+                    };
                 }
                 updates[`rooms/${roomId}/state`] = 'lobby';
                 db.ref().update(updates);
@@ -526,6 +577,8 @@
 
     // Khởi động hệ thống khi vào web
     if (myName && roomId) {
+        // Đánh dấu session cho trường hợp họ F5 ngay lúc mới mở lại
+        sessionStorage.setItem('tab_active', 'true'); 
         listenToRoom(roomId);
     } else {
         if (myName) {
